@@ -253,11 +253,19 @@
   }
 
   // Page title. The heading text is always in the HTML for screen readers; when the logo is shown
-  // on the cover it is the visible title and the heading is visually hidden.
-  function titleHtml(game, logoOnCover) {
-    return logoOnCover
+  // in the header it is the visible title and the heading is visually hidden.
+  function titleHtml(game, logoInHeader) {
+    return logoInHeader
       ? `<h1 id="game-title" class="sr-only">${escapeHtml(game.title)}</h1>`
       : `<h1 id="game-title" class="game-hero-title">${escapeHtml(game.title)}</h1>`;
+  }
+
+  // Game logo next to the brand in the site header; nothing when the game has no logo.
+  // Returns whether a logo is shown (it is then the visible page title).
+  function renderHeaderLogo(game) {
+    const logo = logoImgHtml(game, "brand-game-logo");
+    if (logo) $(".brand").insertAdjacentHTML("beforeend", logo);
+    return Boolean(logo);
   }
 
   // Roles are presented once, as the Challenge Rules cards; the hero only states how many challenge
@@ -272,11 +280,11 @@
         : "",
     ].join("");
     document.title = `Onebros - ${game.title}`;
-    const logoOnCover = renderCover(game);
+    const logoInHeader = renderHeaderLogo(game);
     $("#game-hero").innerHTML = `
       <p class="breadcrumb"><a href="index.html#games">Games</a> <span aria-hidden="true">/</span> ${escapeHtml(game.short)}</p>
       <p class="eyebrow">Challenge rules &amp; Hall of Fame</p>
-      ${titleHtml(game, logoOnCover)}
+      ${titleHtml(game, logoInHeader)}
       ${game.subtitle ? `<p class="hero-lead">${escapeHtml(game.subtitle)}</p>` : ""}
       <div class="game-overview">
         <dl class="hero-stats">

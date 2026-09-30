@@ -279,6 +279,19 @@ code {
   letter-spacing: 0.04em;
 }
 
+/* Game pages: the current game's logo, small, next to the brand name. */
+.brand-game-logo {
+  display: block;
+  height: 36px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+}
+
+.brand-game-logo.blend-screen {
+  mix-blend-mode: screen;
+}
+
 .site-nav ul {
   list-style: none;
   margin: 0;
@@ -1321,7 +1334,7 @@ html:has(body.game-page) {
 .game-hero {
   position: relative;
   overflow: hidden;
-  padding: 64px 0 56px;
+  padding: 32px 0 56px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -1791,7 +1804,7 @@ html:has(body.game-page) {
   }
 
   .game-hero {
-    padding: 40px 0 44px;
+    padding: 24px 0 44px;
   }
 
   .cover.cover--whole {
@@ -1869,6 +1882,11 @@ html:has(body.game-page) {
 }
 
 @media (max-width: 420px) {
+  .brand-game-logo {
+    height: 28px;
+    max-width: 30vw;
+  }
+
   .hero-actions .btn,
   .game-overview .btn,
   .game-actions {
