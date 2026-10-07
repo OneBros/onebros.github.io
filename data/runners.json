@@ -1240,6 +1240,35 @@
           ]
         }
       ]
+    },
+    {
+      "id": "polaris",
+      "name": "Polaris",
+      "avatar": "assets/runners/polaris.jpg",
+      "profile": "https://www.youtube.com/@NorthPoIaris",
+      "addedAt": "2026-10-07T14:57:41Z",
+      "games": [
+        {
+          "game": "ds3",
+          "role": "master",
+          "challenges": [
+            {
+              "title": "SL1 NG+7 No Rolling/Blocking/Parrying",
+              "proof": "https://www.youtube.com/playlist?list=PLRfM7mbztMNEm5SIbhPp8EACOhoWA66vh"
+            }
+          ]
+        },
+        {
+          "game": "ds2",
+          "role": "legend",
+          "challenges": [
+            {
+              "title": "SL1 CoC No Rolling/Blocking/Parrying",
+              "proof": "https://www.youtube.com/playlist?list=PLRfM7mbztMNGy8BPFsGZuk8_krCt58nuB"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
