@@ -48,6 +48,13 @@
         "height": 447,
         "blend": "screen"
       },
+      "tierIcons": {
+        "champion": "assets/games/tiers/des-champion.webp",
+        "legend": "assets/games/tiers/des-legend.webp",
+        "master": "assets/games/tiers/des-master.webp",
+        "elitemaster": "assets/games/tiers/des-elitemaster.webp",
+        "hitless-sage": "assets/games/tiers/des-hitless-sage.webp"
+      },
       "roles": [
         "champion",
         "legend",
@@ -84,6 +91,13 @@
         "height": 196,
         "blend": "screen"
       },
+      "tierIcons": {
+        "champion": "assets/games/tiers/ds1-champion.webp",
+        "legend": "assets/games/tiers/ds1-legend.webp",
+        "master": "assets/games/tiers/ds1-master.webp",
+        "elitemaster": "assets/games/tiers/ds1-elitemaster.webp",
+        "grandmaster": "assets/games/tiers/ds1-grandmaster.webp"
+      },
       "roles": [
         "champion",
         "legend",
@@ -114,6 +128,13 @@
         "height": 98,
         "blend": "screen"
       },
+      "tierIcons": {
+        "champion": "assets/games/tiers/ds2-champion.webp",
+        "legend": "assets/games/tiers/ds2-legend.webp",
+        "master": "assets/games/tiers/ds2-master.webp",
+        "elitemaster": "assets/games/tiers/ds2-elitemaster.webp",
+        "grandmaster": "assets/games/tiers/ds2-grandmaster.webp"
+      },
       "roles": [
         "champion",
         "legend",
@@ -143,6 +164,13 @@
         "height": 58,
         "blend": "screen"
       },
+      "tierIcons": {
+        "champion": "assets/games/tiers/ds3-champion.webp",
+        "legend": "assets/games/tiers/ds3-legend.webp",
+        "master": "assets/games/tiers/ds3-master.webp",
+        "elitemaster": "assets/games/tiers/ds3-elitemaster.webp",
+        "grandmaster": "assets/games/tiers/ds3-grandmaster.webp"
+      },
       "roles": [
         "champion",
         "legend",
@@ -171,6 +199,15 @@
         "width": 1280,
         "height": 720,
         "blend": "screen"
+      },
+      "tierIcons": {
+        "champion": "assets/games/tiers/bb-champion.webp",
+        "legend": "assets/games/tiers/bb-legend.webp",
+        "master": "assets/games/tiers/bb-master.webp",
+        "elitemaster": "assets/games/tiers/bb-elitemaster.webp",
+        "grandmaster": "assets/games/tiers/bb-grandmaster.webp",
+        "hitless-scholar": "assets/games/tiers/bb-hitless-scholar.webp",
+        "hitless-sage": "assets/games/tiers/bb-hitless-sage.webp"
       },
       "roles": [
         "champion",
@@ -207,6 +244,15 @@
         "height": 168,
         "blend": "screen"
       },
+      "tierIcons": {
+        "champion": "assets/games/tiers/sekiro-champion.webp",
+        "legend": "assets/games/tiers/sekiro-legend.webp",
+        "master": "assets/games/tiers/sekiro-master.webp",
+        "elitemaster": "assets/games/tiers/sekiro-elitemaster.webp",
+        "grandmaster": "assets/games/tiers/sekiro-grandmaster.webp",
+        "hitless-scholar": "assets/games/tiers/sekiro-hitless-scholar.webp",
+        "hitless-sage": "assets/games/tiers/sekiro-hitless-sage.webp"
+      },
       "roles": [
         "champion",
         "legend",
@@ -241,6 +287,13 @@
         "width": 640,
         "height": 98,
         "blend": "screen"
+      },
+      "tierIcons": {
+        "champion": "assets/games/tiers/er-champion.webp",
+        "legend": "assets/games/tiers/er-legend.webp",
+        "master": "assets/games/tiers/er-master.webp",
+        "elitemaster": "assets/games/tiers/er-elitemaster.webp",
+        "grandmaster": "assets/games/tiers/er-grandmaster.webp"
       },
       "roles": [
         "champion",

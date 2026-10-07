@@ -1443,6 +1443,34 @@ a.runner-avatar:hover {
   color: var(--tier);
 }
 
+/* Tier icon right after a tier title (games.json "tierIcons"). The title shrinks to its text so
+   the icon stays attached to it rather than at the card's far edge; the icon box is sized by CSS
+   (and width/height), so a late-loading image never shifts the layout. */
+.rule-panel-title.has-icon,
+.card-role-title.has-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.rule-panel-title.has-icon {
+  flex: 0 1 auto;
+  justify-self: start;
+}
+
+.tier-icon {
+  flex: none;
+  width: 1.2em;
+  height: 1.2em;
+  object-fit: contain;
+}
+
+/* Hall of Fame headings are larger (1.8rem): 1em keeps the icon at the Challenge Rules size. */
+.hof-group-title .tier-icon {
+  width: 1em;
+  height: 1em;
+}
+
 .rule-panel .rule-card-body {
   margin-top: 0;
   padding-top: 18px;
