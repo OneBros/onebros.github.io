@@ -221,6 +221,24 @@
         return runnerIndex.get(b.runner) - runnerIndex.get(a.runner);
       },
 
+      /** When a game/role entry was completed: the newest completedAt among its challenges, or "". */
+      entryCompletedAt(entry) {
+        return (entry.challenges || []).reduce((latest, c) => (c.completedAt > latest ? c.completedAt : latest), "");
+      },
+
+      /* Order within one game (homepage game filter):
+       *   1. role, highest first: Grand Master … Champion, then Hitless Sage, Hitless Scholar (roleSortKey)
+       *   2. completedAt, descending; entries without one come after those with one
+       *   3. otherwise compareVerifiedEntry, so undated entries keep a fixed order */
+      compareTierCompleted(a, b) {
+        const byRole = catalog.roleSortKey(b.entry.role) - catalog.roleSortKey(a.entry.role);
+        if (byRole) return byRole;
+        const da = catalog.entryCompletedAt(a.entry);
+        const db = catalog.entryCompletedAt(b.entry);
+        if (da !== db) return da < db ? 1 : -1;
+        return catalog.compareVerifiedEntry(a, b);
+      },
+
       /* Default display order: newest added to the site first.
        *   1. addedAt, descending (ISO date or datetime strings compare correctly as text)
        *   2. same or missing addedAt: later position in runners.json first (entries are appended)

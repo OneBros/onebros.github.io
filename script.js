@@ -165,7 +165,8 @@
         }
         return matchesEntry(entry);
       })
-      .sort(catalog.compareVerifiedEntry);
+      // A game filter lists that game's runs by tier; otherwise newest added first.
+      .sort(game ? catalog.compareTierCompleted : catalog.compareVerifiedEntry);
 
     const countEl = $("#results-count");
     if (!totalRunners) {

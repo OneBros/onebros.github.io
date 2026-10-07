@@ -967,7 +967,9 @@ a.game-card {
   grid-template-columns: minmax(0, 480px);
 }
 
+/* min-height reserves the line before the count is filled in, so the grid below doesn't move. */
 .results-count {
+  min-height: 1.6em;
   font-size: 0.85rem;
   color: var(--text-faint);
   margin-bottom: 20px;
@@ -1441,6 +1443,34 @@ a.runner-avatar:hover {
   color: var(--tier);
 }
 
+/* Tier icon right after a tier title (games.json "tierIcons"). The title shrinks to its text so
+   the icon stays attached to it rather than at the card's far edge; the icon box is sized by CSS
+   (and width/height), so a late-loading image never shifts the layout. */
+.rule-panel-title.has-icon,
+.card-role-title.has-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.rule-panel-title.has-icon {
+  flex: 0 1 auto;
+  justify-self: start;
+}
+
+.tier-icon {
+  flex: none;
+  width: 1.2em;
+  height: 1.2em;
+  object-fit: contain;
+}
+
+/* Hall of Fame headings are larger (1.8rem): 1em keeps the icon at the Challenge Rules size. */
+.hof-group-title .tier-icon {
+  width: 1em;
+  height: 1em;
+}
+
 .rule-panel .rule-card-body {
   margin-top: 0;
   padding-top: 18px;
@@ -1589,6 +1619,12 @@ a.runner-avatar:hover {
 .site-footer {
   padding: 56px 0 40px;
   border-top: 1px solid var(--border);
+}
+
+/* While any "Loading…" placeholder is still on the page, the footer would sit right under it and
+   then be pushed down when the content arrives (a layout shift). It appears with the content instead. */
+main:has(.loading) ~ .site-footer {
+  display: none;
 }
 
 .footer-inner {

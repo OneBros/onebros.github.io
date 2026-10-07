@@ -63,15 +63,23 @@
       </ul>`;
   }
 
+  // Decorative tier icon from games.json ("tierIcons": { <roleId>: src }), shown right after a
+  // tier title; "" when the game has no icon for that role, so the title renders as before.
+  function tierIconHtml(game, roleId) {
+    const src = safeUrl(game.tierIcons && game.tierIcons[roleId]);
+    if (!src) return "";
+    return `<img class="tier-icon" src="${escapeHtml(src)}" width="28" height="28" alt="" aria-hidden="true" loading="lazy" decoding="async">`;
+  }
+
   // One rule card: every piece of a role's rules, shown once. A collapsible panel like the
   // General Rules: collapsed unless a direct #anchor targets it.
-  function ruleCardHtml({ id, cls, label, title, body, open }) {
+  function ruleCardHtml({ id, cls, label, title, body, open, icon = "" }) {
     return `
       <details class="rule-panel rule-card is-tier ${cls}" id="${escapeHtml(id)}"${open ? " open" : ""}>
         <summary>
           <span class="rule-panel-heading">
             <span class="tier-label">${escapeHtml(label)}</span>
-            <span class="rule-panel-title">${escapeHtml(title)}</span>
+            <span class="rule-panel-title${icon ? " has-icon" : ""}">${escapeHtml(title)}${icon}</span>
           </span>
           <span class="rule-panel-icon" aria-hidden="true"></span>
         </summary>
@@ -85,6 +93,7 @@
         <h3 class="hof-group-title">
           <span class="tier-dot" aria-hidden="true"></span>
           ${escapeHtml(catalog.roleName(game.id, role.id))}
+          ${tierIconHtml(game, role.id)}
           <span class="hof-count">${entries.length}</span>
         </h3>
         <div class="runners-grid">
@@ -139,6 +148,7 @@
         cls: `tier-${escapeHtml(t.role)}`,
         label: t.label,
         title: t.name,
+        icon: tierIconHtml(game, t.role),
         open: t.id === hash,
         body: `<div class="prose">${contentHtml(t.content)}</div>${cardChallengesHtml(t.challengesTitle, t.challenges)}`,
       })
@@ -154,13 +164,14 @@
             <p class="card-note">Not part of the Onebros tier progression. See also the <a href="index.html#rules-no-hit">general No Hit rules</a>.</p>
             <div class="prose">${contentHtml(noHit.content)}</div>
             ${noHit.roles
-              .map(
-                (r) => `
+              .map((r) => {
+                const icon = tierIconHtml(game, r.role);
+                return `
               <div class="card-role tier-${escapeHtml(r.role)}">
-                <h4 class="card-role-title">${escapeHtml(r.name)}</h4>
+                <h4 class="card-role-title${icon ? " has-icon" : ""}">${escapeHtml(r.name)}${icon}</h4>
                 <div class="prose">${contentHtml(r.content)}</div>
-              </div>`
-              )
+              </div>`;
+              })
               .join("")}`,
         })
       : "";
@@ -310,7 +321,12 @@
     document.title = `Onebros - ${game.title}`;
     renderPageBackground(game);
     const logoOnCover = renderCover(game);
-    $("#game-hero").innerHTML = `
+    // Fill a fresh element: the cover appears above it in this same frame, and reusing the
+    // placeholder's element would count as that element shifting down (a layout shift).
+    const placeholder = $("#game-hero");
+    const hero = placeholder.cloneNode(false);
+    placeholder.replaceWith(hero);
+    hero.innerHTML = `
       <p class="breadcrumb"><a href="index.html#games">Games</a> <span aria-hidden="true">/</span> ${escapeHtml(game.short)}</p>
       <p class="eyebrow">Challenge rules &amp; Hall of Fame</p>
       ${titleHtml(game, logoOnCover)}
