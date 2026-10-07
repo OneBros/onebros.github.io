@@ -310,7 +310,12 @@
     document.title = `Onebros - ${game.title}`;
     renderPageBackground(game);
     const logoOnCover = renderCover(game);
-    $("#game-hero").innerHTML = `
+    // Fill a fresh element: the cover appears above it in this same frame, and reusing the
+    // placeholder's element would count as that element shifting down (a layout shift).
+    const placeholder = $("#game-hero");
+    const hero = placeholder.cloneNode(false);
+    placeholder.replaceWith(hero);
+    hero.innerHTML = `
       <p class="breadcrumb"><a href="index.html#games">Games</a> <span aria-hidden="true">/</span> ${escapeHtml(game.short)}</p>
       <p class="eyebrow">Challenge rules &amp; Hall of Fame</p>
       ${titleHtml(game, logoOnCover)}

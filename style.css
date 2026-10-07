@@ -967,7 +967,9 @@ a.game-card {
   grid-template-columns: minmax(0, 480px);
 }
 
+/* min-height reserves the line before the count is filled in, so the grid below doesn't move. */
 .results-count {
+  min-height: 1.6em;
   font-size: 0.85rem;
   color: var(--text-faint);
   margin-bottom: 20px;
@@ -1589,6 +1591,12 @@ a.runner-avatar:hover {
 .site-footer {
   padding: 56px 0 40px;
   border-top: 1px solid var(--border);
+}
+
+/* While any "Loading…" placeholder is still on the page, the footer would sit right under it and
+   then be pushed down when the content arrives (a layout shift). It appears with the content instead. */
+main:has(.loading) ~ .site-footer {
+  display: none;
 }
 
 .footer-inner {
