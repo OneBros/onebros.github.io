@@ -36,7 +36,8 @@
       "page": true,
       "cardBackground": {
         "src": "assets/games/des-background.webp",
-        "position": "center"
+        "position": "center",
+        "overlay": -0.1
       },
       "pageBackground": {
         "src": "assets/games/des-background.webp",
@@ -79,7 +80,8 @@
       "page": true,
       "cardBackground": {
         "src": "assets/games/ds1-background.webp",
-        "position": "center"
+        "position": "center",
+        "overlay": -0.2
       },
       "pageBackground": {
         "src": "assets/games/ds1-background.webp",
@@ -116,7 +118,8 @@
       "page": true,
       "cardBackground": {
         "src": "assets/games/ds2-background.jpg",
-        "position": "center"
+        "position": "center",
+        "overlay": -0.06
       },
       "pageBackground": {
         "src": "assets/games/ds2-background.jpg",
@@ -152,7 +155,8 @@
       "page": true,
       "cardBackground": {
         "src": "assets/games/ds3-background.jpg",
-        "position": "center"
+        "position": "center",
+        "overlay": 0
       },
       "pageBackground": {
         "src": "assets/games/ds3-background.jpg",
@@ -187,12 +191,13 @@
       "year": 2015,
       "page": true,
       "cardBackground": {
-        "src": "assets/games/bb-background.jpg",
-        "position": "center"
+        "src": "assets/games/bb-background.webp",
+        "position": "35% center",
+        "overlay": -0.04
       },
       "pageBackground": {
-        "src": "assets/games/bb-background.jpg",
-        "position": "center"
+        "src": "assets/games/bb-background.webp",
+        "position": "65% center"
       },
       "logo": {
         "src": "assets/games/bb-logo.jpg",
@@ -232,7 +237,8 @@
       "page": true,
       "cardBackground": {
         "src": "assets/games/sekiro-background.jpg",
-        "position": "center"
+        "position": "center",
+        "overlay": -0.12
       },
       "pageBackground": {
         "src": "assets/games/sekiro-background.jpg",
@@ -276,7 +282,8 @@
       "page": true,
       "cardBackground": {
         "src": "assets/games/er-background.jpg",
-        "position": "center"
+        "position": "center",
+        "overlay": -0.05
       },
       "pageBackground": {
         "src": "assets/games/er-background.jpg",

@@ -835,9 +835,16 @@ body.has-page-bg .section-alt {
   background-repeat: no-repeat;
 }
 
-/* Shaded most behind the title at the top and the stats row at the bottom, lightest mid-card. */
+/* Shaded most behind the title at the top and the stats row at the bottom, lightest mid-card.
+   --card-overlay-adjust (games.json cardBackground.overlay) evens out brightness between games;
+   it moves the top and middle stops only, so the bottom row keeps its contrast. */
 .game-card.has-bg {
-  --card-overlay: linear-gradient(180deg, rgba(12, 11, 10, 0.86) 0%, rgba(12, 11, 10, 0.66) 45%, rgba(12, 11, 10, 0.9) 100%);
+  --card-overlay: linear-gradient(
+    180deg,
+    rgba(12, 11, 10, calc(0.86 + var(--card-overlay-adjust, 0))) 0%,
+    rgba(12, 11, 10, calc(0.66 + var(--card-overlay-adjust, 0))) 45%,
+    rgba(12, 11, 10, 0.9) 100%
+  );
 }
 
 .game-card-top {
@@ -998,9 +1005,15 @@ a.game-card {
   overflow: hidden;
 }
 
-/* Darker than game cards: the avatar, name and challenges stay the focus. */
+/* Darker than game cards: the avatar, name and challenges stay the focus. The per-game
+   --card-overlay-adjust moves the top and middle stops, as on game cards. */
 .runner-card.has-bg {
-  --card-overlay: linear-gradient(180deg, rgba(12, 11, 10, 0.78) 0%, rgba(12, 11, 10, 0.68) 50%, rgba(12, 11, 10, 0.82) 100%);
+  --card-overlay: linear-gradient(
+    180deg,
+    rgba(12, 11, 10, calc(0.78 + var(--card-overlay-adjust, 0))) 0%,
+    rgba(12, 11, 10, calc(0.68 + var(--card-overlay-adjust, 0))) 50%,
+    rgba(12, 11, 10, 0.82) 100%
+  );
 }
 
 .runner-head {

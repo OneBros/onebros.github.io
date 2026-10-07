@@ -288,14 +288,17 @@
       </details>`;
   }
 
-  // Optional card artwork from games.json ("cardBackground": { src, position? }), as a style
+  // Optional card artwork from games.json ("cardBackground": { src, position?, overlay? }), as a style
   // attribute setting the CSS variables used by .has-bg; "" when the game has none.
+  // overlay: added to the dark overlay's top and middle opacity (negative = lighter artwork), so
+  // backgrounds of different brightness look consistent; clamped to a safe range.
   function cardBackgroundStyle(game) {
     const bg = game && game.cardBackground;
     const src = bg && safeUrl(bg.src);
     if (!src) return "";
     const position = /^[\w\s.%-]+$/.test(bg.position || "") ? `; --card-bg-position: ${bg.position}` : "";
-    return ` style="${escapeHtml(`--card-bg: url("${src}")${position}`)}"`;
+    const overlay = Number.isFinite(bg.overlay) ? `; --card-overlay-adjust: ${Math.min(0.2, Math.max(-0.3, bg.overlay))}` : "";
+    return ` style="${escapeHtml(`--card-bg: url("${src}")${position}${overlay}`)}"`;
   }
 
   /* ---------- Runner component ---------- */
