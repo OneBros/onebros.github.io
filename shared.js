@@ -326,7 +326,9 @@
     const proof = safeUrl(challenge.proof);
     const label = challengeLinkLabel(challenge, mode, proof ? shortFallback : "");
     if (!label) return "";
-    const title = escapeHtml(label);
+    // A line-break opportunity after each "/" lets slash-joined restrictions
+    // ("Rolling/Blocking/Parrying/…") wrap at the slashes in narrow cards; the text is unchanged.
+    const title = escapeHtml(label).replace(/\//g, "/<wbr>");
     // The challenge title itself is the proof link.
     return proof
       ? `<li><a class="challenge-link" href="${escapeHtml(proof)}" target="_blank" rel="noopener noreferrer">${title}</a></li>`
