@@ -736,7 +736,14 @@ code {
 body.has-page-bg::before {
   content: "";
   position: fixed;
-  inset: 0;
+  /* Sized to the largest viewport, not inset: 0: mobile browsers resize the visible viewport as
+     the address bar hides/shows while scrolling, and "cover" would rescale the artwork each time
+     (a visible jump). With a constant size the bar simply covers the bottom edge. */
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 100vh;
+  height: 100lvh;
   z-index: -1;
   pointer-events: none;
   background-image:
@@ -828,9 +835,16 @@ body.has-page-bg .section-alt {
   background-repeat: no-repeat;
 }
 
-/* Shaded most behind the title at the top and the stats row at the bottom, lightest mid-card. */
+/* Shaded most behind the title at the top and the stats row at the bottom, lightest mid-card.
+   --card-overlay-adjust (games.json cardBackground.overlay) evens out brightness between games;
+   it moves the top and middle stops only, so the bottom row keeps its contrast. */
 .game-card.has-bg {
-  --card-overlay: linear-gradient(180deg, rgba(12, 11, 10, 0.86) 0%, rgba(12, 11, 10, 0.66) 45%, rgba(12, 11, 10, 0.9) 100%);
+  --card-overlay: linear-gradient(
+    180deg,
+    rgba(12, 11, 10, calc(0.86 + var(--card-overlay-adjust, 0))) 0%,
+    rgba(12, 11, 10, calc(0.66 + var(--card-overlay-adjust, 0))) 45%,
+    rgba(12, 11, 10, 0.9) 100%
+  );
 }
 
 .game-card-top {
@@ -991,9 +1005,15 @@ a.game-card {
   overflow: hidden;
 }
 
-/* Darker than game cards: the avatar, name and challenges stay the focus. */
+/* Darker than game cards: the avatar, name and challenges stay the focus. The per-game
+   --card-overlay-adjust moves the top and middle stops, as on game cards. */
 .runner-card.has-bg {
-  --card-overlay: linear-gradient(180deg, rgba(12, 11, 10, 0.78) 0%, rgba(12, 11, 10, 0.68) 50%, rgba(12, 11, 10, 0.82) 100%);
+  --card-overlay: linear-gradient(
+    180deg,
+    rgba(12, 11, 10, calc(0.78 + var(--card-overlay-adjust, 0))) 0%,
+    rgba(12, 11, 10, calc(0.68 + var(--card-overlay-adjust, 0))) 50%,
+    rgba(12, 11, 10, 0.82) 100%
+  );
 }
 
 .runner-head {
@@ -1231,8 +1251,11 @@ a.runner-avatar:hover {
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.8);
 }
 
+/* minmax(0, 1fr) instead of the implicit auto column: an auto column can't shrink below its
+   longest unbreakable text, which pushed run panels past the card edge in narrow cards. */
 .runner-entries {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   padding: 0 20px 18px;
 }
@@ -1261,6 +1284,13 @@ a.runner-avatar:hover {
   gap: 8px;
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+/* Game and role labels may wrap inside the panel rather than widen it. */
+.runner-entry-game,
+.runner-entry-tier {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .runner-entry-game,
@@ -1309,6 +1339,7 @@ a.runner-avatar:hover {
   margin: 8px 0 0;
   padding: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 4px;
 }
 
@@ -1319,7 +1350,10 @@ a.runner-avatar:hover {
   color: var(--tier, var(--accent));
 }
 
+/* Wraps at spaces and the slashes first (see challengeHtml); "anywhere" is the last resort for
+   a single word wider than the panel, so a title is never clipped. */
 .challenge-link {
+  overflow-wrap: anywhere;
   font-size: 0.95rem;
   font-weight: 600;
   text-decoration: underline;

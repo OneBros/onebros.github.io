@@ -288,14 +288,17 @@
       </details>`;
   }
 
-  // Optional card artwork from games.json ("cardBackground": { src, position? }), as a style
+  // Optional card artwork from games.json ("cardBackground": { src, position?, overlay? }), as a style
   // attribute setting the CSS variables used by .has-bg; "" when the game has none.
+  // overlay: added to the dark overlay's top and middle opacity (negative = lighter artwork), so
+  // backgrounds of different brightness look consistent; clamped to a safe range.
   function cardBackgroundStyle(game) {
     const bg = game && game.cardBackground;
     const src = bg && safeUrl(bg.src);
     if (!src) return "";
     const position = /^[\w\s.%-]+$/.test(bg.position || "") ? `; --card-bg-position: ${bg.position}` : "";
-    return ` style="${escapeHtml(`--card-bg: url("${src}")${position}`)}"`;
+    const overlay = Number.isFinite(bg.overlay) ? `; --card-overlay-adjust: ${Math.min(0.2, Math.max(-0.3, bg.overlay))}` : "";
+    return ` style="${escapeHtml(`--card-bg: url("${src}")${position}${overlay}`)}"`;
   }
 
   /* ---------- Runner component ---------- */
@@ -326,7 +329,9 @@
     const proof = safeUrl(challenge.proof);
     const label = challengeLinkLabel(challenge, mode, proof ? shortFallback : "");
     if (!label) return "";
-    const title = escapeHtml(label);
+    // A line-break opportunity after each "/" lets slash-joined restrictions
+    // ("Rolling/Blocking/Parrying/…") wrap at the slashes in narrow cards; the text is unchanged.
+    const title = escapeHtml(label).replace(/\//g, "/<wbr>");
     // The challenge title itself is the proof link.
     return proof
       ? `<li><a class="challenge-link" href="${escapeHtml(proof)}" target="_blank" rel="noopener noreferrer">${title}</a></li>`
