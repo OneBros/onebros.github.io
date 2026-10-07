@@ -736,7 +736,14 @@ code {
 body.has-page-bg::before {
   content: "";
   position: fixed;
-  inset: 0;
+  /* Sized to the largest viewport, not inset: 0: mobile browsers resize the visible viewport as
+     the address bar hides/shows while scrolling, and "cover" would rescale the artwork each time
+     (a visible jump). With a constant size the bar simply covers the bottom edge. */
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 100vh;
+  height: 100lvh;
   z-index: -1;
   pointer-events: none;
   background-image:
