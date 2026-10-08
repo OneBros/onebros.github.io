@@ -574,12 +574,22 @@ code {
   mask-composite: intersect;
 }
 
+/* The Bloodborne logo is a 16:9 image whose lettering fills only its middle 30% (rows 227-445 of
+   720). Crop the empty bands above and below, keeping a margin around the letters, so it sizes
+   like the other logos on game pages and runner profiles. The image itself is unchanged. */
+img.cover-logo[src$="bb-logo.jpg"],
+img.profile-game-logo[src$="bb-logo.jpg"] {
+  aspect-ratio: 1280 / 300;
+  object-fit: cover;
+  object-position: 50% 46%;
+}
+
 /* Whole-image variant */
 
 .cover.cover--whole {
   --cover-max: max(1680px, var(--container)); /* text is baked in: no wider than the page content */
   --cover-zoom: 1;
-  --cover-fade: 72px; /* room below the image where it fades into the page */
+  --cover-fade: 40px; /* room below the image where it fades into the page */
   --cover-shade:
     linear-gradient(
       180deg,
@@ -719,6 +729,7 @@ code {
   font-weight: 700;
   line-height: 1.1;
   color: var(--text);
+  font-variant-numeric: lining-nums; /* the font's default old-style 7 and 9 drop below the line */
 }
 
 /* ---------- Sections ---------- */
@@ -1771,17 +1782,22 @@ html:has(body.game-page) {
   border-top: 1px solid var(--border);
 }
 
-/* Two equal columns (each as wide as the wider stat), the divider centered between them. */
+/* One equal column per stat (each as wide as the widest), the dividers evenly spaced. */
 .game-overview .hero-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   margin: 0;
   padding-top: 0;
   border-top: 0;
 }
 
-.game-overview .stat:last-child {
-  padding-right: 0;
+/* Same padding on both sides of every stat, centered in its column: the dividers sit midway
+   between the stats, and each column is as wide as before (the row keeps its width). */
+.game-overview .stat {
+  padding: 0 24px;
+  text-align: center;
 }
 
 .game-actions {
@@ -2246,7 +2262,7 @@ html:has(body.game-page) {
 
   .cover.cover--whole {
     --cover-zoom: 1.45; /* trim the sides so the banner text stays legible */
-    --cover-fade: 36px;
+    --cover-fade: 24px;
   }
 
   .cover {
@@ -2281,6 +2297,10 @@ html:has(body.game-page) {
 
   .stat + .stat {
     padding-left: 12px;
+  }
+
+  .game-overview .stat {
+    padding: 0 12px;
   }
 
   .stat dt {
@@ -2323,6 +2343,11 @@ html:has(body.game-page) {
   .game-overview .btn,
   .game-actions {
     flex: 1 1 100%;
+  }
+
+  /* Narrower gutters, so the middle stat's longest word ("challenges") fits an equal column. */
+  .game-overview .stat {
+    padding: 0 8px;
   }
 
   .restriction-group {

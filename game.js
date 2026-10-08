@@ -252,6 +252,7 @@
       sections,
       roleCount: tierSections.length + (noHit ? noHit.roles.length : 0),
       runnerCount: new Set(gameEntries.map((e) => e.runner.id)).size,
+      completedCount: catalog.completionCount(gameEntries),
     };
   }
 
@@ -309,7 +310,8 @@
 
   // Roles are presented once, as the Challenge Rules cards; the hero only states how many challenge
   // roles the page presents (every OneBros tier plus every No Hit role) and links to the submission form.
-  function renderHero(game, roleCount, runnerCount, submitRunUrl, discordUrl) {
+  // Completed challenges are counted as on the homepage, for this game's entries only.
+  function renderHero(game, roleCount, runnerCount, completedCount, submitRunUrl, discordUrl) {
     const actions = [
       discordUrl
         ? `<a class="btn btn-discord" href="${escapeHtml(discordUrl)}" target="_blank" rel="noopener noreferrer">${discordIcon}Join the Discord</a>`
@@ -334,6 +336,7 @@
       <div class="game-overview">
         <dl class="hero-stats">
           <div class="stat"><dt>Verified runners</dt><dd>${runnerCount}</dd></div>
+          <div class="stat"><dt>Completed challenges</dt><dd>${completedCount}</dd></div>
           <div class="stat"><dt>Challenge roles</dt><dd>${roleCount}</dd></div>
         </dl>
         ${actions ? `<div class="game-actions">${actions}</div>` : ""}
@@ -440,8 +443,8 @@
       return;
     }
 
-    const { sections, roleCount, runnerCount } = buildPage(catalog, game, rules);
-    renderHero(game, roleCount, runnerCount, catalog.submitRunUrl, catalog.discordUrl);
+    const { sections, roleCount, runnerCount, completedCount } = buildPage(catalog, game, rules);
+    renderHero(game, roleCount, runnerCount, completedCount, catalog.submitRunUrl, catalog.discordUrl);
     content.innerHTML = sections.map((s, i) => sectionHtml({ ...s, alt: i % 2 === 0 })).join("");
     initPanelToggle($("#challenge-rules-toggle-all"), () => [...document.querySelectorAll("#rules .rule-panel")]);
     renderSectionNav([{ id: "overview", nav: "Overview" }, ...sections]);
