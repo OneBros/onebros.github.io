@@ -589,7 +589,7 @@ img.profile-game-logo[src$="bb-logo.jpg"] {
 .cover.cover--whole {
   --cover-max: max(1680px, var(--container)); /* text is baked in: no wider than the page content */
   --cover-zoom: 1;
-  --cover-fade: 72px; /* room below the image where it fades into the page */
+  --cover-fade: 40px; /* room below the image where it fades into the page */
   --cover-shade:
     linear-gradient(
       180deg,
@@ -2256,7 +2256,7 @@ html:has(body.game-page) {
 
   .cover.cover--whole {
     --cover-zoom: 1.45; /* trim the sides so the banner text stays legible */
-    --cover-fade: 36px;
+    --cover-fade: 24px;
   }
 
   .cover {
