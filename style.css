@@ -737,10 +737,12 @@ body.has-page-bg::before {
   content: "";
   position: fixed;
   /* Sized to the largest viewport, not inset: 0: mobile browsers resize the visible viewport as
-     the address bar hides/shows while scrolling, and "cover" would rescale the artwork each time
-     (a visible jump). With a constant size the bar simply covers the bottom edge. */
-  top: 0;
+     the address bar hides/shows while scrolling, and "cover" would rescale the artwork each time.
+     Anchored to the bottom, not the top: Chrome Android's top address bar carries top-anchored
+     fixed elements with it as it slides, while the viewport's bottom edge stays on the screen's
+     bottom. The bar instead covers the layer's top edge until it hides. */
   right: 0;
+  bottom: 0;
   left: 0;
   height: 100vh;
   height: 100lvh;
