@@ -1269,6 +1269,35 @@
           ]
         }
       ]
+    },
+    {
+      "id": "captainmoonlight",
+      "name": "Moon, Spear of Malenia",
+      "avatar": "assets/runners/captainmoonlight.jpg",
+      "profile": "https://www.youtube.com/@MoonsPointlessProductions",
+      "addedAt": "2026-10-08",
+      "games": [
+        {
+          "game": "des",
+          "role": "champion",
+          "challenges": []
+        },
+        {
+          "game": "ds1",
+          "role": "legend",
+          "challenges": []
+        },
+        {
+          "game": "ds2",
+          "role": "champion",
+          "challenges": []
+        },
+        {
+          "game": "ds3",
+          "role": "champion",
+          "challenges": []
+        }
+      ]
     }
   ]
 }
