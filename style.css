@@ -729,6 +729,7 @@ img.profile-game-logo[src$="bb-logo.jpg"] {
   font-weight: 700;
   line-height: 1.1;
   color: var(--text);
+  font-variant-numeric: lining-nums; /* the font's default old-style 7 and 9 drop below the line */
 }
 
 /* ---------- Sections ---------- */
