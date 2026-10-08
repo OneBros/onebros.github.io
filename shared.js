@@ -208,6 +208,12 @@
         return runners.flatMap((runner) => (runner.games || []).map((entry) => ({ runner, entry })));
       },
 
+      // Completed challenges in these { runner, entry } pairs (default: all): each listed challenge
+      // counts once, and a verified role-only entry (no challenges listed) still counts as one.
+      completionCount(pairs = catalog.entries()) {
+        return pairs.reduce((sum, { entry }) => sum + Math.max(1, (entry.challenges || []).length), 0);
+      },
+
       /** When this game/role entry was added to the site: the entry's own addedAt, else the runner's.
        * completedAt is never used here, so verified historical runs still show as recent additions. */
       entryVerifiedAt(entry, runner) {

@@ -30,10 +30,7 @@
   const HOMEPAGE_RECENT_RUNS = 10;
 
   function renderStats() {
-    // A verified role-only entry (no challenges listed) still counts as one completed challenge.
-    const challengeCount = catalog
-      .entries()
-      .reduce((sum, { entry }) => sum + Math.max(1, (entry.challenges || []).length), 0);
+    const challengeCount = catalog.completionCount();
     const set = (key, value) => {
       const el = document.querySelector(`[data-stat="${key}"]`);
       if (el) el.textContent = value;

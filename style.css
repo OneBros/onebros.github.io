@@ -1781,17 +1781,22 @@ html:has(body.game-page) {
   border-top: 1px solid var(--border);
 }
 
-/* Two equal columns (each as wide as the wider stat), the divider centered between them. */
+/* One equal column per stat (each as wide as the widest), the dividers evenly spaced. */
 .game-overview .hero-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   margin: 0;
   padding-top: 0;
   border-top: 0;
 }
 
-.game-overview .stat:last-child {
-  padding-right: 0;
+/* Same padding on both sides of every stat, centered in its column: the dividers sit midway
+   between the stats, and each column is as wide as before (the row keeps its width). */
+.game-overview .stat {
+  padding: 0 24px;
+  text-align: center;
 }
 
 .game-actions {
@@ -2293,6 +2298,10 @@ html:has(body.game-page) {
     padding-left: 12px;
   }
 
+  .game-overview .stat {
+    padding: 0 12px;
+  }
+
   .stat dt {
     font-size: 0.65rem;
     letter-spacing: 0.08em;
@@ -2333,6 +2342,11 @@ html:has(body.game-page) {
   .game-overview .btn,
   .game-actions {
     flex: 1 1 100%;
+  }
+
+  /* Narrower gutters, so the middle stat's longest word ("challenges") fits an equal column. */
+  .game-overview .stat {
+    padding: 0 8px;
   }
 
   .restriction-group {
