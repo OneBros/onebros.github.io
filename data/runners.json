@@ -1096,15 +1096,27 @@
     },
     {
       "id": "squidofentropy",
-      "name": "squidofentropy",
-      "avatar": "",
-      "profile": null,
+      "name": "SquidofEntropy",
+      "avatar": "assets/runners/squidofentropy.jpg",
+      "profile": "https://www.youtube.com/@SquidofEntropy",
       "addedAt": "2026-10-03",
       "games": [
         {
           "game": "sekiro",
           "role": "champion",
           "challenges": []
+        },
+        {
+          "game": "sekiro",
+          "role": "legend",
+          "addedAt": "2026-10-08T10:20:07Z",
+          "challenges": [
+            {
+              "title": "No Skills/Items/Buffs",
+              "proof": "https://www.youtube.com/watch?v=8hIZ8T5MHVk",
+              "completedAt": "2026-10-07"
+            }
+          ]
         }
       ]
     },
