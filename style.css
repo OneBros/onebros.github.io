@@ -653,20 +653,19 @@ code {
   margin-top: 0;
 }
 
+/* Three equal centered columns; equal side padding gives every label the same width to wrap in. */
 .hero-intro .hero-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  max-width: 720px;
   margin: 0;
   padding-top: 0;
   border-top: 0;
+  text-align: center;
 }
 
-/* The label takes any spare height, so the numbers line up whether a label wraps to one line or two. */
 .hero-intro .stat {
-  display: flex;
-  flex-direction: column;
-}
-
-.hero-intro .stat dt {
-  flex: 1;
+  padding: 0 24px;
 }
 
 .hero-lead {
@@ -692,7 +691,11 @@ code {
   padding-top: 24px;
 }
 
+/* Label row takes any spare height with the label at its foot, so the numbers line up and sit the
+   same distance below their labels whether a label wraps to one line or two. */
 .stat {
+  display: grid;
+  grid-template-rows: 1fr auto;
   padding-right: 24px;
 }
 
@@ -702,6 +705,7 @@ code {
 }
 
 .stat dt {
+  align-self: end;
   font-size: 0.75rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -737,10 +741,12 @@ body.has-page-bg::before {
   content: "";
   position: fixed;
   /* Sized to the largest viewport, not inset: 0: mobile browsers resize the visible viewport as
-     the address bar hides/shows while scrolling, and "cover" would rescale the artwork each time
-     (a visible jump). With a constant size the bar simply covers the bottom edge. */
-  top: 0;
+     the address bar hides/shows while scrolling, and "cover" would rescale the artwork each time.
+     Anchored to the bottom, not the top: Chrome Android's top address bar carries top-anchored
+     fixed elements with it as it slides, while the viewport's bottom edge stays on the screen's
+     bottom. The bar instead covers the layer's top edge until it hides. */
   right: 0;
+  bottom: 0;
   left: 0;
   height: 100vh;
   height: 100lvh;
@@ -1765,11 +1771,17 @@ html:has(body.game-page) {
   border-top: 1px solid var(--border);
 }
 
+/* Two equal columns (each as wide as the wider stat), the divider centered between them. */
 .game-overview .hero-stats {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   margin: 0;
   padding-top: 0;
   border-top: 0;
+}
+
+.game-overview .stat:last-child {
+  padding-right: 0;
 }
 
 .game-actions {
@@ -2222,6 +2234,10 @@ html:has(body.game-page) {
     align-self: stretch;
     padding-top: 20px;
     border-top: 1px solid var(--border);
+  }
+
+  .hero-intro .stat {
+    padding: 0 8px;
   }
 
   .game-hero {
