@@ -653,20 +653,19 @@ code {
   margin-top: 0;
 }
 
+/* Three equal centered columns; equal side padding gives every label the same width to wrap in. */
 .hero-intro .hero-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  max-width: 720px;
   margin: 0;
   padding-top: 0;
   border-top: 0;
+  text-align: center;
 }
 
-/* The label takes any spare height, so the numbers line up whether a label wraps to one line or two. */
 .hero-intro .stat {
-  display: flex;
-  flex-direction: column;
-}
-
-.hero-intro .stat dt {
-  flex: 1;
+  padding: 0 24px;
 }
 
 .hero-lead {
@@ -692,7 +691,11 @@ code {
   padding-top: 24px;
 }
 
+/* Label row takes any spare height with the label at its foot, so the numbers line up and sit the
+   same distance below their labels whether a label wraps to one line or two. */
 .stat {
+  display: grid;
+  grid-template-rows: 1fr auto;
   padding-right: 24px;
 }
 
@@ -702,6 +705,7 @@ code {
 }
 
 .stat dt {
+  align-self: end;
   font-size: 0.75rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1767,11 +1771,17 @@ html:has(body.game-page) {
   border-top: 1px solid var(--border);
 }
 
+/* Two equal columns (each as wide as the wider stat), the divider centered between them. */
 .game-overview .hero-stats {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   margin: 0;
   padding-top: 0;
   border-top: 0;
+}
+
+.game-overview .stat:last-child {
+  padding-right: 0;
 }
 
 .game-actions {
@@ -2224,6 +2234,10 @@ html:has(body.game-page) {
     align-self: stretch;
     padding-top: 20px;
     border-top: 1px solid var(--border);
+  }
+
+  .hero-intro .stat {
+    padding: 0 8px;
   }
 
   .game-hero {
