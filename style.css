@@ -574,6 +574,16 @@ code {
   mask-composite: intersect;
 }
 
+/* The Bloodborne logo is a 16:9 image whose lettering fills only its middle 30% (rows 227-445 of
+   720). Crop the empty bands above and below, keeping a margin around the letters, so it sizes
+   like the other logos on game pages and runner profiles. The image itself is unchanged. */
+img.cover-logo[src$="bb-logo.jpg"],
+img.profile-game-logo[src$="bb-logo.jpg"] {
+  aspect-ratio: 1280 / 300;
+  object-fit: cover;
+  object-position: 50% 46%;
+}
+
 /* Whole-image variant */
 
 .cover.cover--whole {
