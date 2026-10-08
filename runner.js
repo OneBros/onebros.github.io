@@ -269,9 +269,9 @@
     const body = groups.length
       ? groups
           .map(([gameId, group]) => {
+            // No card artwork: the game banner above the card already shows it.
             const card = runnerCard(catalog, runner, group, {
               challengeMode: "full",
-              background: true,
               head: false,
               showGame: false,
             });
