@@ -1310,6 +1310,36 @@
           "challenges": []
         }
       ]
+    },
+    {
+      "id": "dimon",
+      "name": "Dimon",
+      "avatar": "assets/runners/dimon.jpg",
+      "profile": "https://www.youtube.com/channel/UC0j6nWDa4_Y56Jx_t1h2D6w",
+      "addedAt": "2026-10-11T17:25:25Z",
+      "games": [
+        {
+          "game": "ds1",
+          "role": "legend",
+          "challenges": [
+            {
+              "title": "SL1 NG+6",
+              "restrictions": "SL1, NG+6, No hit/RTSR/Pyromancy",
+              "proof": "https://www.youtube.com/watch?v=FUdMNygc4u4"
+            }
+          ]
+        },
+        {
+          "game": "ds1",
+          "role": "champion",
+          "challenges": []
+        },
+        {
+          "game": "ds3",
+          "role": "champion",
+          "challenges": []
+        }
+      ]
     }
   ]
 }
