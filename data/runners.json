@@ -1340,6 +1340,25 @@
           "challenges": []
         }
       ]
+    },
+    {
+      "id": "alvarito9346",
+      "name": "alvarito9346",
+      "avatar": "assets/runners/alvarito9346.jpg",
+      "profile": "https://www.youtube.com/@alvarito9346",
+      "addedAt": "2026-10-11T17:43:18Z",
+      "games": [
+        {
+          "game": "sekiro",
+          "role": "hitless-sage",
+          "challenges": [
+            {
+              "title": "All Bosses & Minibosses + Beads Sword Only No Skills No Hit/Damage",
+              "proof": "https://www.youtube.com/watch?v=2hwVVQsHR6k"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
