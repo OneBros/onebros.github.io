@@ -477,6 +477,18 @@
           ]
         },
         {
+          "game": "ds1",
+          "role": "master",
+          "addedAt": "2026-10-12T17:53:38Z",
+          "challenges": [
+            {
+              "title": "SL1 +0 Weapons No Rolling/Blocking/Parrying",
+              "restrictions": "SL1 No Roll/Block/Parry +0 Weapons",
+              "proof": "https://youtube.com/playlist?list=PLPROAdvntAdFNgiriWh4_vkM-tLtXH6u5"
+            }
+          ]
+        },
+        {
           "game": "sekiro",
           "role": "legend",
           "challenges": [
