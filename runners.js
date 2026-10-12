@@ -11,6 +11,7 @@
     $,
     loadJson,
     loadCatalog,
+    populateRunnerFilters,
     runnerCard,
     staffForRunner,
     withStaffIdentity,
@@ -27,6 +28,9 @@
     const grid = $("#runners-grid");
     const countEl = $("#results-count");
     const query = $("#filter-search").value.trim().toLowerCase();
+    const game = $("#filter-game").value;
+    const role = $("#filter-role").value;
+    const filtering = Boolean(query || game || role);
     const total = catalog.runners.length;
 
     if (!total) {
@@ -37,6 +41,9 @@
 
     const runners = catalog.runners
       .filter((runner) => {
+        // Both dropdowns must match the same recognized game/role entry.
+        if ((game || role) && !(runner.games || []).some(entry =>
+          (!game || entry.game === game) && (!role || entry.role === role))) return false;
         if (!query) return true;
         const person = staffForRunner(staffPeople, runner);
         const shown = withStaffIdentity(runner, person);
@@ -46,7 +53,7 @@
       .sort(catalog.compareRunnerCompleted);
 
     const word = total === 1 ? "runner" : "runners";
-    countEl.textContent = query ? `${runners.length} of ${total} verified ${word}` : `${total} verified ${word}`;
+    countEl.textContent = filtering ? `${runners.length} of ${total} verified ${word}` : `${total} verified ${word}`;
     grid.innerHTML = runners.length
       ? runners
           .map((runner) => {
@@ -54,7 +61,7 @@
             return runnerCard(catalog, shown, shown.games || [], { background: true });
           })
           .join("")
-      : `<p class="empty">No runners match this search.</p>`;
+      : `<p class="empty">No runners match these filters.</p>`;
   }
 
   async function init() {
@@ -70,8 +77,11 @@
       return;
     }
     initGamesMenu(catalog);
+    populateRunnerFilters(catalog);
     renderRunners();
     $("#filter-search").addEventListener("input", renderRunners);
+    $("#filter-game").addEventListener("change", renderRunners);
+    $("#filter-role").addEventListener("change", renderRunners);
   }
 
   document.addEventListener("DOMContentLoaded", init);

@@ -993,11 +993,6 @@ a.game-card {
   outline: none;
 }
 
-/* Runners page: name search only. */
-.filters.runners-filters {
-  grid-template-columns: minmax(0, 480px);
-}
-
 /* min-height reserves the line before the count is filled in, so the grid below doesn't move. */
 .results-count {
   min-height: 1.6em;
