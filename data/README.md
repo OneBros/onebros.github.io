@@ -64,7 +64,7 @@ Append an object to the **end** of the `runners` array in `runners.json`:
   Champion run). The role name on the card ("Champion") becomes the link. Runs with challenges
   keep their links on `challenges[].proof`.
 - `addedAt` (every new runner): when the entry was **added to the Onebros site**. Used for the
-  default display order on the homepage and in each game's Hall of Fame: newest added first.
+  homepage Recent Runs: newest added first, unless the game/role entry has its own `addedAt`.
   Runners with the same `addedAt` keep their order in this file, the one further down (added
   later) first; runners without `addedAt` come after all dated ones.
   It is about the site listing, not the achievement.
@@ -78,12 +78,25 @@ Append an object to the **end** of the `runners` array in `runners.json`:
   `+03:00`: the values are compared as text. Older date-only values (`YYYY-MM-DD`) stay valid;
   they sort before any timestamp of the same day, and only an exact tie falls back to the
   position in this file.
-- `challenges[].completedAt` (optional): **when the achievement was completed**, `YYYY-MM-DD` —
-  historical metadata only, never used for ordering. If the run was never dated explicitly,
-  use the documented proxy: the publish date of the last required video of the proof (e.g. the
-  final boss of a playlist) — never the date the runner was added here. Omit it when it cannot
-  be established. A runner may have `addedAt` and no `completedAt`, or several challenges with
-  different `completedAt` dates.
+- `challenges[].completedAt` (optional): completion date, `YYYY-MM-DD`. Source priority:
+  (1) independently documented actual completion; (2) otherwise the publication date of the
+  most recently published relevant proof video; (3) otherwise the calendar day of the entry
+  `addedAt`, falling back to the runner's `addedAt`. Never use submission or verification
+  dates as completion dates. A publication proxy or site-addition fallback does not establish
+  the actual day the challenge was completed. For YouTube, retain the calendar day from the
+  source `publishDate` metadata without UTC conversion; inspect every relevant playlist video,
+  rather than assuming the last playlist item is newest. Record the source when backfilling
+  or correcting dates. Keep `addedAt` independent and unchanged.
+- Sorting: Recent Runs use entry/runner `addedAt`; the homepage game filter keeps tier then
+  entry completion date, with its existing `addedAt` tie-breaker. The Runners directory uses
+  each runner's newest challenge `completedAt` across all games. Profiles keep game groups,
+  ordered by their highest tier, then the Games menu order from `games.json`;
+  entries within each group use tier then completion, and challenges use completion descending.
+  Hall of Fame keeps its tier groups and orders entries within each by their newest challenge
+  completion. No Hit remains in its existing separate track, with the same date ordering.
+  Missing completion dates sort after dated ones within the applicable tier/group. Directory
+  and Hall of Fame date ties use later runner position in this file first; challenge ties keep
+  their input order. No `addedAt` fallback is applied by those completion comparators.
 - Neither date is shown on the cards yet.
 - `games[]`: one entry per role a runner holds in a game. A Onebros role and a No Hit role
   in the same game are two separate entries.
@@ -91,6 +104,47 @@ Append an object to the **end** of the `runners` array in `runners.json`:
 - `games[].role`: a role id from the table above. Pages show the game's own name where it has one.
 - `challenges[].title`: shown as the link text. `proof` is the video URL it opens.
   An empty `proof` shows the title as plain text.
+
+### Completion-date audit (2026-10-12)
+
+All 70 challenges were reviewed. For 69, exact YouTube publication metadata supplies the
+publication proxy; independently documented actual completion dates were not available.
+Only Soul (`reaper8475`), `ds1` / `legend`, remains unverified and retains `2026-10-05`
+from the existing `runner.addedAt`. This is a conventional sorting fallback, not a verified
+completion or publication date. The other twelve former site-addition fallbacks now use
+confirmed publication dates. The completion comparators themselves never substitute `addedAt`.
+
+## Importing and validating runner changes
+
+Run `npm run validate` and `npm test` before submitting runner data. GitHub Actions
+runs both checks on pushes and pull requests. The validator rejects invalid calendar
+dates, missing challenge completion dates, duplicate runner IDs/names, duplicate
+game/role entries and repeated proofs within a game/role. YouTube video/playlist IDs
+are case-sensitive; tracking parameters do not create a distinct challenge.
+
+The tracker importer accepts optional CSV columns `Completion Date` and
+`Proof Publication Date`, both strictly `YYYY-MM-DD`. Populate them only after
+reviewing the actual completion evidence or exact publication metadata. For a playlist,
+inspect all relevant videos and supply the most recently published video's calendar
+day, regardless of playlist position. The importer performs no metadata retrieval.
+`Checked Date`, `Timestamp`, submission dates and verification dates are ignored.
+An absent documented date uses entry `addedAt`, otherwise runner `addedAt`.
+
+New runners and new game/role entries receive the actual import-time UTC `addedAt`.
+Normal reimports preserve existing names, profiles, avatars, proofs and dates, including
+empty fields. Corrections to existing dates require an explicit reviewed JSON edit;
+the importer does not perform them. Use `runner-aliases.json` to resolve alternative
+names to existing IDs. `--replace` remains an explicit destructive rebuild option;
+matching existing challenges retain their data and dates.
+
+For a new challenge in an existing game/role entry, review whether that entry needs
+an explicit `addedAt` correction so it appears in Recent Runs: the current schema has
+one site-addition date per game/role, not per challenge. The importer preserves any
+existing value. Onebros and Hitless follow the same date rules; Hitless remains its
+separate track.
+
+Validation checks structure and calendar validity, not the truth of a supplied date.
+Include the evidence and source choice in the pull request for human review.
 
 ## Staff
 

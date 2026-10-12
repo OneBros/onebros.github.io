@@ -101,6 +101,7 @@
             .map(({ runner, entry }) =>
               runnerCard(catalog, withStaffIdentity(runner, staffForRunner(staffPeople, runner)), [entry], {
                 challengeMode: "full",
+                sortCompleted: true,
               })
             )
             .join("")}
@@ -220,7 +221,7 @@
           role,
           entries: gameEntries
             .filter(({ entry }) => entry.role === role.id)
-            .sort((a, b) => catalog.compareAdded(a.runner, b.runner)),
+            .sort(catalog.compareCompletedEntry),
         }))
         .filter((g) => g.entries.length);
     const mainGroups = groupsFor("onebros");
