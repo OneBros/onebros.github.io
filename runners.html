@@ -52,10 +52,22 @@
     <!-- Runners, rendered from data/runners.json -->
     <section class="section" id="runner-list" aria-label="All runners">
       <div class="container">
-        <form class="filters runners-filters" id="runner-filters" role="search" onsubmit="return false;">
+        <form class="filters" id="runner-filters" role="search" onsubmit="return false;">
           <label class="field">
             <span class="field-label">Search</span>
-            <input type="search" id="filter-search" placeholder="Runner name…" autocomplete="off">
+            <input type="search" id="filter-search" placeholder="Runner name..." autocomplete="off">
+          </label>
+          <label class="field">
+            <span class="field-label">Game</span>
+            <select id="filter-game">
+              <option value="">All games</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Role</span>
+            <select id="filter-role">
+              <option value="">All roles</option>
+            </select>
           </label>
         </form>
 

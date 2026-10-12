@@ -12,6 +12,7 @@
     cardBackgroundStyle,
     loadJson,
     loadCatalog,
+    populateRunnerFilters,
     rulePanelHtml,
     runnerCard,
     staffForRunner,
@@ -115,28 +116,6 @@
     initPanelToggle($("#rules-toggle-all"), () => [...document.querySelectorAll("#rules .rule-panel")]);
   }
 
-  function populateFilters() {
-    $("#filter-game").insertAdjacentHTML(
-      "beforeend",
-      catalog.games.map((g) => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.title)}</option>`).join("")
-    );
-    // One option group per track, so No Hit roles stay separate from OneBros roles.
-    $("#filter-role").insertAdjacentHTML(
-      "beforeend",
-      catalog.tracks
-        .map(
-          (track) => `
-        <optgroup label="${escapeHtml(track.name)}">
-          ${catalog
-            .rolesInTrack(track.id)
-            .map((r) => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)}</option>`)
-            .join("")}
-        </optgroup>`
-        )
-        .join("")
-    );
-  }
-
   function renderRunners() {
     const grid = $("#runners-grid");
     const query = $("#filter-search").value.trim().toLowerCase();
@@ -216,7 +195,7 @@
       renderStats();
       renderHeroLinks();
       renderGames();
-      populateFilters();
+      populateRunnerFilters(catalog);
       renderRunners();
 
       $("#filter-search").addEventListener("input", renderRunners);
