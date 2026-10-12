@@ -13,7 +13,9 @@
  * Export tip: on Checking Tracker, filter Status = Accepted, then File → Download → CSV.
  *
  * Only Status=Accepted rows are used. Existing runners keep avatar, profile, and
- * display name unless the sheet provides a Hitless profile and profile is empty.
+ * display name, profile, proofs and dates unchanged when reimported.
+ * Completion Date and Proof Publication Date are optional documented YYYY-MM-DD
+ * columns. Checked Date and Timestamp are never achievement dates.
  *
  * Use --replace to rebuild runners.json from the filtered CSV (drops runners /
  * challenges that no longer qualify). Metadata (avatar, profile, name) is kept
@@ -31,6 +33,7 @@ const ALIASES_PATH = path.join(__dirname, "runner-aliases.json");
 const ASSETS_RUNNERS = path.join(ROOT, "assets", "runners");
 const { fetchAvatarsForRunners } = require("./youtube-avatar");
 const { matchChallengeTitle } = require("./match-challenge-title");
+const { validDate, proofKey, validateRunners } = require("./validate-runners");
 
 /* Sheet "Game" text → games.json id */
 const GAME_MAP = {
@@ -182,8 +185,8 @@ function headerIndex(headers) {
     game: find("Game"),
     tier: find("Tier"),
     restrictions: find("Restrictions"),
-    checked: find("Checked Date"),
-    timestamp: find("Timestamp", "Submission date", "Submission Date"),
+    completed: find("Completion Date"),
+    published: find("Proof Publication Date"),
     hitlessProfile: find("Team Hitless Profile"),
   };
 }
@@ -193,22 +196,12 @@ function cell(row, index) {
   return String(row[index] || "").trim();
 }
 
-/** Parse sheet dates like 10/3/2026 or 9/26/2026 23:34:10 → YYYY-MM-DD */
+/** Explicit documented dates only; ambiguous sheet dates are rejected. */
 function toIsoDate(value) {
   const raw = String(value || "").trim();
-  if (!raw || /^done$/i.test(raw)) return "";
-  const m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (m) {
-    const month = m[1].padStart(2, "0");
-    const day = m[2].padStart(2, "0");
-    return `${m[3]}-${month}-${day}`;
-  }
-  if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 10);
-  return "";
-}
-
-function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  if (!raw) return "";
+  if (!validDate(raw)) throw new Error(`Invalid documented date: ${raw}; use YYYY-MM-DD`);
+  return raw;
 }
 
 function mapGame(label) {
@@ -256,18 +249,13 @@ function buildChallengeFields(gameId, roleId, restrictionsText) {
 }
 
 function proofUrlsEqual(a, b) {
-  const clean = (u) =>
-    String(u || "")
-      .trim()
-      .replace(/[?&]si=[^&]+/i, "")
-      .replace(/\?$/, "")
-      .toLowerCase();
-  return clean(a) === clean(b);
+  return proofKey(a) === proofKey(b);
 }
 
 function findChallenge(challenges, proof, fields) {
   return (challenges || []).find((c) => {
     if (proof && c.proof && proofUrlsEqual(c.proof, proof)) return true;
+    if (proof && c.proof) return false;
     if (!fields) return false;
     if (fields.title && c.title === fields.title) return true;
     if (fields.restrictions && c.restrictions === fields.restrictions) return true;
@@ -275,7 +263,8 @@ function findChallenge(challenges, proof, fields) {
   });
 }
 
-function mergeRun(existingData, acceptedRows, aliases) {
+function mergeRun(existingData, acceptedRows, aliases, addedAt = new Date().toISOString().replace(/\.\d{3}Z$/, "Z")) {
+  validateRunners(existingData);
   const runners = JSON.parse(JSON.stringify(existingData.runners || []));
   const byId = new Map(runners.map((r) => [r.id, r]));
   const warnings = [];
@@ -315,7 +304,8 @@ function mergeRun(existingData, acceptedRows, aliases) {
     }
 
     const aliasId = aliases[normalizeKey(runnerName)];
-    const id = aliasId || slugifyId(runnerName);
+    const matched = runners.find(r => normalizeKey(r.name) === normalizeKey(runnerName) || normalizeKey(r.id) === normalizeKey(runnerName));
+    const id = aliasId || (matched && matched.id) || slugifyId(runnerName);
     if (!id) {
       warnings.push(`Could not derive id for runner "${runnerName}"`);
       summary.skipped += 1;
@@ -323,6 +313,9 @@ function mergeRun(existingData, acceptedRows, aliases) {
     }
 
     let runner = byId.get(id);
+    if (runner && !aliasId && !matched) {
+      throw new Error(`Runner id collision for "${runnerName}"; add an explicit runner alias`);
+    }
     let isNew = false;
     if (!runner) {
       isNew = true;
@@ -331,23 +324,18 @@ function mergeRun(existingData, acceptedRows, aliases) {
         name: runnerName,
         avatar: "",
         profile: profileUrl(hitlessProfile) || null,
-        addedAt: completedAt || todayIso(),
+        addedAt,
         games: [],
       };
       runners.push(runner);
       byId.set(id, runner);
       summary.addedRunners += 1;
-    } else {
-      // Keep staff-edited display name / avatar. Fill empty profile from Hitless link.
-      const profile = profileUrl(hitlessProfile);
-      if ((!runner.profile || runner.profile === null) && profile) {
-        runner.profile = profile;
-      }
     }
 
     let entry = (runner.games || []).find((g) => g.game === gameId && g.role === roleId);
     if (!entry) {
       entry = { game: gameId, role: roleId, challenges: [] };
+      if (!isNew) entry.addedAt = addedAt;
       runner.games.push(entry);
       if (!isNew) summary.updatedRunners += 1;
     }
@@ -359,15 +347,11 @@ function mergeRun(existingData, acceptedRows, aliases) {
 
     const existing = findChallenge(entry.challenges, proof, fields);
     if (existing) {
-      if (proof && !existing.proof) existing.proof = proof;
-      if (completedAt && !existing.completedAt) existing.completedAt = completedAt;
-      if (fields.title && !existing.title) existing.title = fields.title;
-      if (fields.restrictions && !existing.restrictions) existing.restrictions = fields.restrictions;
       continue;
     }
 
     const challenge = { ...fields, proof: proof || "" };
-    if (completedAt) challenge.completedAt = completedAt;
+    challenge.completedAt = completedAt || (entry.addedAt || runner.addedAt).slice(0, 10);
     entry.challenges.push(challenge);
     summary.addedChallenges += 1;
     if (!isNew) summary.updatedRunners += 1;
@@ -375,7 +359,9 @@ function mergeRun(existingData, acceptedRows, aliases) {
 
   // Deduplicate updatedRunners count (rough): recount unique non-new updated ids is hard;
   // leave as incremental signal. Sort: keep existing order, append new runners at end.
-  return { runners: { runners }, summary, warnings };
+  const result = { ...existingData, runners };
+  validateRunners(result);
+  return { runners: result, summary, warnings };
 }
 
 function rowsFromCsv(csvPath) {
@@ -399,8 +385,8 @@ function rowsFromCsv(csvPath) {
     const sheetGame = cell(row, idx.game);
     const sheetTier = cell(row, idx.tier);
     const restrictions = cell(row, idx.restrictions);
-    const checked = toIsoDate(cell(row, idx.checked));
-    const stamped = toIsoDate(cell(row, idx.timestamp));
+    const completed = toIsoDate(cell(row, idx.completed));
+    const published = toIsoDate(cell(row, idx.published));
 
     accepted.push({
       runnerName: cell(row, idx.runner),
@@ -408,7 +394,7 @@ function rowsFromCsv(csvPath) {
       roleId: mapTier(sheetTier),
       restrictions,
       proof: cell(row, idx.link),
-      completedAt: checked || stamped,
+      completedAt: completed || published,
       hitlessProfile: profileUrl(cell(row, idx.hitlessProfile)),
       sheetGame,
       sheetTier,
@@ -432,7 +418,12 @@ Usage:
 
 CSV columns (Checking Tracker export):
   Status, Checker, Runner, Link, Game, Tier, Restrictions,
-  Checked Date, Timestamp, Team Hitless Profile, ...
+  Team Hitless Profile, Completion Date, Proof Publication Date, ...
+
+Documented dates must use YYYY-MM-DD. Completion Date takes priority over
+Proof Publication Date (newest relevant playlist video, manually verified).
+Checked Date and Timestamp are ignored. Without documented dates, completedAt
+falls back to entry/runner addedAt. Existing challenges remain unchanged.
 
 Only rows with Status=Accepted are imported.
 Aliases: scripts/runner-aliases.json
@@ -444,6 +435,7 @@ Sample:  scripts/sync-runners.sample.csv`);
   if (!fs.existsSync(csvPath)) die(`File not found: ${csvPath}`);
 
   const existing = JSON.parse(fs.readFileSync(RUNNERS_PATH, "utf8"));
+  validateRunners(existing);
   const aliases = loadAliases();
   const accepted = rowsFromCsv(csvPath);
 
@@ -461,10 +453,21 @@ Sample:  scripts/sync-runners.sample.csv`);
     for (const runner of runners.runners) {
       const prev = prevById.get(runner.id);
       if (!prev) continue;
-      if (prev.avatar) runner.avatar = prev.avatar;
-      if (prev.profile) runner.profile = prev.profile;
-      if (prev.name) runner.name = prev.name;
-      if (prev.addedAt) runner.addedAt = prev.addedAt;
+      Object.assign(runner, prev, { games: runner.games });
+      for (const entry of runner.games) {
+        const old = prev.games.find(e => e.game === entry.game && e.role === entry.role);
+        if (!old) continue;
+        if (old.addedAt === undefined) delete entry.addedAt;
+        Object.assign(entry, old, { challenges: entry.challenges });
+        for (let i = 0; i < entry.challenges.length; i++) {
+          const c = entry.challenges[i];
+          const prior = findChallenge(old.challenges, c.proof, c);
+          if (prior) entry.challenges[i] = { ...prior };
+          else if (!accepted.some(row => row.completedAt && proofUrlsEqual(row.proof, c.proof))) {
+            c.completedAt = (entry.addedAt || runner.addedAt).slice(0, 10);
+          }
+        }
+      }
     }
   }
 
@@ -493,7 +496,8 @@ Sample:  scripts/sync-runners.sample.csv`);
 
   if (!args.skipAvatars) {
     console.log("\nFetching YouTube avatars…");
-    const { fetched, failed } = await fetchAvatarsForRunners(runners.runners, {
+    const existingIds = new Set(existing.runners.map(r => r.id));
+    const { fetched, failed } = await fetchAvatarsForRunners(runners.runners.filter(r => !existingIds.has(r.id)), {
       assetsDir: ASSETS_RUNNERS,
       onlyEmpty: true,
     });
@@ -504,11 +508,13 @@ Sample:  scripts/sync-runners.sample.csv`);
     }
   }
 
+  validateRunners(runners);
   fs.writeFileSync(RUNNERS_PATH, `${JSON.stringify(runners, null, 2)}\n`, "utf8");
   console.log(`\nWrote ${path.relative(ROOT, RUNNERS_PATH)}`);
 }
 
-main().catch((err) => {
+module.exports = { mergeRun, rowsFromCsv, toIsoDate, proofUrlsEqual };
+if (require.main === module) main().catch((err) => {
   console.error(err);
   process.exit(1);
 });

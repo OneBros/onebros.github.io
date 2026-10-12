@@ -1,7 +1,7 @@
 /* OneBros - runners page
  * Lists every verified runner from data/runners.json through the shared catalog: one runner card
  * each (picture, name and every role they hold). The picture and name open the runner page.
- * Order is the catalog's default (newest added first). Depends on shared.js.
+ * Order is each runner's newest completedAt first. Depends on shared.js.
  */
 (function () {
   "use strict";
@@ -43,7 +43,7 @@
         return [shown.name, runner.name, runner.id, person && person.username]
           .some((value) => String(value || "").toLowerCase().includes(query));
       })
-      .sort(catalog.compareAdded);
+      .sort(catalog.compareRunnerCompleted);
 
     const word = total === 1 ? "runner" : "runners";
     countEl.textContent = query ? `${runners.length} of ${total} verified ${word}` : `${total} verified ${word}`;

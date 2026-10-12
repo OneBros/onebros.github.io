@@ -2,6 +2,8 @@
   "name": "onebros.github.io",
   "private": true,
   "scripts": {
+    "test": "node --test scripts/runners.test.js",
+    "validate": "node scripts/validate-runners.js",
     "start": "npx --yes http-server -p 4173 -c-1 .",
     "sync-runners": "node scripts/sync-runners.js",
     "fetch-avatars": "node scripts/fetch-runner-avatars.js"

@@ -259,10 +259,10 @@
     }
     const order = new Map(catalog.games.map((g, i) => [g.id, i]));
     const highest = (group) =>
-      group.reduce((top, entry) => (catalog.compareEntryTier(entry, top) < 0 ? entry : top));
-    // Highest tier first, so the leading section is the one behind the page background.
+      group.reduce((top, entry) => (catalog.compareEntryCompleted(entry, top) < 0 ? entry : top));
+    // Keep game groups: highest tier first, then Games menu order.
     const groups = [...byGame.entries()].sort((a, b) => {
-      const byTier = catalog.compareEntryTier(highest(a[1]), highest(b[1]));
+      const byTier = catalog.compareEntryCompleted(highest(a[1]), highest(b[1]));
       if (byTier) return byTier;
       return (order.get(a[0]) ?? 99) - (order.get(b[0]) ?? 99);
     });
@@ -272,6 +272,7 @@
             // No card artwork: the game banner above the card already shows it.
             const card = runnerCard(catalog, runner, group, {
               challengeMode: "full",
+              sortCompleted: true,
               head: false,
               showGame: false,
             });

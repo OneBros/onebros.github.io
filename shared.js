@@ -232,6 +232,48 @@
         return (entry.challenges || []).reduce((latest, c) => (c.completedAt > latest ? c.completedAt : latest), "");
       },
 
+      // Newest completion first; missing dates last. Exact ties keep their input order.
+      compareChallengeCompleted(a, b) {
+        const da = a.completedAt || "";
+        const db = b.completedAt || "";
+        return da === db ? 0 : da < db ? 1 : -1;
+      },
+
+      runnerCompletedAt(runner) {
+        return (runner.games || []).reduce((latest, entry) => {
+          const date = catalog.entryCompletedAt(entry);
+          return date > latest ? date : latest;
+        }, "");
+      },
+
+      // Directory ties retain the existing later-in-file-first convention, without addedAt.
+      compareRunnerCompleted(a, b) {
+        const da = catalog.runnerCompletedAt(a);
+        const db = catalog.runnerCompletedAt(b);
+        if (da !== db) return da < db ? 1 : -1;
+        return runnerIndex.get(b) - runnerIndex.get(a);
+      },
+
+      // Hall of Fame entries within an existing tier group.
+      compareCompletedEntry(a, b) {
+        const da = catalog.entryCompletedAt(a.entry);
+        const db = catalog.entryCompletedAt(b.entry);
+        if (da !== db) return da < db ? 1 : -1;
+        return runnerIndex.get(b.runner) - runnerIndex.get(a.runner);
+      },
+
+      // Profile entries and game groups: tracks/tiers, then Games menu order, then completion.
+      compareEntryCompleted(a, b) {
+        const byRole = catalog.roleSortKey(b.role) - catalog.roleSortKey(a.role);
+        if (byRole) return byRole;
+        const byGame = (gameIndex.get(a.game) ?? games.length) - (gameIndex.get(b.game) ?? games.length);
+        if (byGame) return byGame;
+        const da = catalog.entryCompletedAt(a);
+        const db = catalog.entryCompletedAt(b);
+        if (da !== db) return da < db ? 1 : -1;
+        return 0;
+      },
+
       /* Order within one game (homepage game filter):
        *   1. role, highest first: Grand Master … Champion, then Hitless Sage, Hitless Scholar (roleSortKey)
        *   2. completedAt, descending; entries without one come after those with one
@@ -357,12 +399,13 @@
    * shows just "Game — Role", with no empty list or placeholder.
    * opts.head: false omits the picture and name (the runner page already shows them).
    * opts.showGame: false omits the game name on each row (the runner page titles the game once).
+   * opts.sortCompleted: profiles and Hall of Fame sort by tier/completion and date their challenges.
    */
   function runnerCard(catalog, runner, entries = runner.games || [], opts = {}) {
-    const { highlight = () => false, background = false, challengeMode = "short", head = true, showGame = true } = opts;
+    const { highlight = () => false, background = false, challengeMode = "short", head = true, showGame = true, sortCompleted = false } = opts;
     const pageUrl = catalog.runnerPageUrl(runner.id);
     const name = escapeHtml(runner.name);
-    const sorted = [...entries].sort(catalog.compareEntryTier);
+    const sorted = [...entries].sort(sortCompleted ? catalog.compareEntryCompleted : catalog.compareEntryTier);
     const topRole = sorted[0] ? catalog.role(sorted[0].role) : null;
     // Background artwork is the game of the first row, which is the highest tier.
     const top = background ? sorted[0] || null : null;
@@ -382,7 +425,9 @@
         // No Hit runs have no canonical challenge title: in short mode their proof link is named
         // after the role (e.g. "Hitless Sage") instead of listing the full restrictions.
         const shortFallback = role && role.track === "nohit" ? role.name : "";
-        const challenges = (entry.challenges || [])
+        const challengeEntries = [...(entry.challenges || [])];
+        if (sortCompleted) challengeEntries.sort(catalog.compareChallengeCompleted);
+        const challenges = challengeEntries
           .map((c) => challengeHtml(c, challengeMode, shortFallback))
           .filter(Boolean);
         // A role-only run (e.g. a Champion run, which has no challenge title) puts its proof on the
