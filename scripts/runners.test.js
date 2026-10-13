@@ -60,7 +60,7 @@ test("all existing runners and challenges validate and reimport without changes"
 test("sorting uses latest challenge date, menu priority, stable ties and independent addedAt", async () => {
   const data = merge([row({ completedAt: "2020-01-01" }), row({ proof: "https://youtu.be/Second", completedAt: "2022-01-01" })]);
   const games = JSON.parse(fs.readFileSync(require.resolve("../data/games.json"), "utf8"));
-  const ctx = { window: { location: { href: "https://example.com/" } }, URL, fetch: async p => ({ ok: true, json: async () => p.includes("runners") ? data : games }) };
+  const ctx = { window: { location: { href: "https://example.com/" } }, URL, fetch: async p => ({ ok: true, json: async () => p.includes("runners") ? data : p === "data/games.json" ? games : JSON.parse(fs.readFileSync(require.resolve(`../${p}`), "utf8")) }) };
   vm.createContext(ctx); vm.runInContext(fs.readFileSync(require.resolve("../shared.js"), "utf8"), ctx);
   const cat = await ctx.window.OneBros.loadCatalog();
   assert.equal(cat.runnerCompletedAt(cat.runners[0]), "2022-01-01");
@@ -72,4 +72,310 @@ test("sorting uses latest challenge date, menu priority, stable ties and indepen
   const videos = [{ published: "2022-01-01" }, { published: "2024-01-01" }, { published: "2021-01-01" }];
   const latest = videos.map(v => v.published).sort().at(-1);
   assert.equal(merge([row({ completedAt: latest })]).runners[0].games[0].challenges[0].completedAt, "2024-01-01");
+});
+
+const approvedHitlessTitles = new Map([
+  ["face-man/des", "SL1 All Bosses No Sprint Melee Only"],
+  ["adonutirl/ds1", "SL1 All Bosses"],
+  ["zeldasouls/ds1", "SL1 All Bosses No Roll"],
+  ["dolos6331/ds2", "SL1 Any% +0"],
+  ["adonutirl/ds2", "SL1 Any% +0"],
+  ["cloudi1234/ds3", "SL1 Any% +0"],
+  ["vernonroche4174/ds3", "SL1 All Bosses +0 NG+7"],
+  ["lecarbonator/ds3", "SL1 All Bosses +0"],
+  ["admiraljub/bb", "BL4 Any% No Roll"],
+  ["adonutirl/bb", "BL4 All Bosses"],
+  ["recycle/er", "RL1 All Great Runes +0"],
+  ["vernonroche4174/er", "RL1 Any% +0"],
+  ["mmmmmhmhmhmmhm/er", "RL1 Any% +0"],
+  ["adonutirl/er", "RL1 Any% +0"],
+]);
+
+test("all four run surfaces use approved titles and preserve pending entries", async () => {
+  const source = fs.readFileSync(require.resolve("../shared.js"), "utf8");
+  const makeContext = async (script) => {
+    const ctx = { window: { location: { href: "https://example.com/" } }, URL,
+      fetch: async p => ({ ok: true, json: async () => JSON.parse(fs.readFileSync(require.resolve(`../${p}`), "utf8")) }) };
+    vm.createContext(ctx);
+    vm.runInContext(script, ctx);
+    return { api: ctx.window.OneBros, cat: await ctx.window.OneBros.loadCatalog() };
+  };
+  const { api, cat } = await makeContext(source);
+  // Reproduce the pre-change renderer to compare every excluded and Hitless card.
+  const previous = await makeContext(source.replace('const displayTitle = officialDisplayTitle(catalog, runner, entry, c);', 'const displayTitle = "";'));
+  const surfaces = [
+    ["runners.js", {}],
+    ["script.js", {}],
+    ["runner.js", { challengeMode: "full", sortCompleted: true, head: false }],
+    ["game.js", { challengeMode: "full", sortCompleted: true, showGame: false }],
+  ];
+  const excluded = new Set(["unholypancake/des/elitemaster"]);
+  const confirmed = new Map([
+    ["geori/ds1/master", "SL1 NG+6 No Rolling/Blocking/Parrying"],
+    ["reaper8475/ds1/legend", "SL1 No Rolling/Blocking/Parrying"],
+    ["sassasallalla23/sekiro/elitemaster", "Attack Power 1 Sword Only No Skills"],
+    ["squidofentropy/sekiro/legend", "No Skills/Combat Arts + No Items/Buffs"],
+    ["jonathan/sekiro/master", "Attack Power 1 + No Prosthetic Tools + No Items/Buffs"],
+  ]);
+  const combinations = new Map([
+    ["geori", "No Prosthetic Tools + No Skills/Combat Arts + No Items/Buffs"],
+    ["geod22", "No Prosthetic Tools + No Items/Buffs"],
+    ["reaper8475", "No Prosthetic Tools + No Items/Buffs"],
+    ["fragileember", "No Skills/Combat Arts + No Items/Buffs"],
+    ["ca-waves", "No Prosthetic Tools + No Skills/Combat Arts + No Items/Buffs"],
+    ["abyssalsnake", "Attack Power 1 + No Prosthetic Tools + No Skills/Combat Arts + No Items/Buffs"],
+    ["saigosen", "Attack Power 1 + No Prosthetic Tools + No Items/Buffs"],
+  ]);
+  let safe = 0, changed = 0, hitless = 0, pending = 0;
+  const before = JSON.stringify(cat.runners);
+  for (const runner of cat.runners) for (const entry of runner.games) {
+    const isHitless = cat.role(entry.role).track === "nohit";
+    const isExcluded = excluded.has(`${runner.id}/${entry.game}/${entry.role}`);
+    const combination = entry.game === "sekiro" && ["legend", "master"].includes(entry.role)
+      ? combinations.get(runner.id) : "";
+    const confirmedTitle = confirmed.get(`${runner.id}/${entry.game}/${entry.role}`);
+    for (const challenge of entry.challenges) {
+      if (isHitless) hitless++;
+      else if (isExcluded) pending++;
+      else {
+        if (confirmedTitle) {
+          if (entry.role !== "elitemaster") {
+            for (const phrase of confirmedTitle.split(" + ")) {
+              assert(cat.officialTitles(entry.game, entry.role).has(phrase)
+                || (entry.game === "sekiro" && entry.role === "master" && cat.officialTitles("sekiro", "legend").has(phrase)));
+            }
+          }
+        } else if (combination) {
+          for (const phrase of combination.split(" + ")) assert(cat.officialTitles("sekiro", "legend").has(phrase));
+        } else assert(cat.isOfficialChallengeTitle(entry, challenge), `${runner.id}/${entry.game}/${entry.role}`);
+        safe++;
+        if (combination || (confirmedTitle && confirmedTitle !== challenge.title)
+          || (challenge.restrictions && challenge.restrictions !== challenge.title)) changed++;
+      }
+    }
+    for (const [file, opts] of surfaces) {
+      assert.match(fs.readFileSync(require.resolve(`../${file}`), "utf8"), /runnerCard\(/);
+      const html = api.runnerCard(cat, runner, [entry], opts);
+      const hitlessTitle = isHitless && approvedHitlessTitles.get(`${runner.id}/${entry.game}`);
+      if (hitlessTitle && entry.challenges.length) {
+        assert(html.includes(`>${api.escapeHtml(hitlessTitle)}</`), `${file}: approved Hitless title`);
+      } else if (isHitless || isExcluded) {
+        assert.equal(html, previous.api.runnerCard(previous.cat, runner, [entry], opts));
+      } else for (const challenge of entry.challenges) {
+        const label = api.escapeHtml(confirmedTitle || combination || challenge.title).replace(/\//g, "/<wbr>");
+        assert(html.includes(`>${label}</`), `${file}: ${runner.id}`);
+        if (challenge.restrictions && challenge.restrictions !== challenge.title) {
+          const personalLabel = api.escapeHtml(challenge.restrictions).replace(/\//g, "/<wbr>");
+          assert(!html.includes(`>${personalLabel}</`), `${file}: personal restrictions`);
+        }
+      }
+    }
+  }
+  assert.equal(JSON.stringify(cat.runners), before);
+  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 52, changed: 38, hitless: 21, pending: 1 });
+});
+
+async function sekiroRenderingFixture(sourceOverride) {
+  const source = sourceOverride || fs.readFileSync(require.resolve("../shared.js"), "utf8");
+  async function load(script) {
+    const ctx = { window: { location: { href: "https://example.com/" } }, URL,
+      fetch: async p => ({ ok: true, json: async () => JSON.parse(fs.readFileSync(require.resolve(`../${p}`), "utf8")) }) };
+    vm.createContext(ctx); vm.runInContext(script, ctx);
+    return { api: ctx.window.OneBros, cat: await ctx.window.OneBros.loadCatalog() };
+  }
+  const current = await load(source);
+  const original = await load(source.replace('const displayTitle = officialDisplayTitle(catalog, runner, entry, c);', 'const displayTitle = "";'));
+  const ids = new Set(["geori", "geod22", "reaper8475", "fragileember", "ca-waves", "abyssalsnake", "saigosen"]);
+  const reviewed = current.cat.runners.flatMap(r => ids.has(r.id)
+    ? r.games.filter(e => e.game === "sekiro" && ["legend", "master"].includes(e.role)).map(e => ({ runner: r, entry: e })) : []);
+  assert.equal(reviewed.length, 7);
+  const render = (fixture, runner, entry, mode) => fixture.api.runnerCard(fixture.cat, runner, [entry], { challengeMode: mode });
+  return { current, original, reviewed, render };
+}
+
+test("Sekiro changed challenge data falls back instead of reusing a runner's reviewed combination", async () => {
+  const { current, original, reviewed, render } = await sekiroRenderingFixture();
+  for (const { runner, entry } of reviewed) {
+    const challenge = entry.challenges[0];
+    for (const patch of [
+      { title: "Attack Power 1", restrictions: "Attack Power 1" },
+      { title: challenge.title + " changed" },
+      { restrictions: challenge.restrictions + ", different challenge" },
+      { restrictions: undefined },
+    ]) {
+      const changed = { ...entry, challenges: [{ ...challenge, ...patch }] };
+      for (const mode of ["short", "full"]) assert.equal(render(current, runner, changed, mode), render(original, runner, changed, mode));
+    }
+    const wrongTier = { ...entry, role: entry.role === "legend" ? "master" : "legend" };
+    for (const mode of ["short", "full"]) assert.equal(render(current, runner, wrongTier, mode), render(original, runner, wrongTier, mode));
+  }
+});
+
+test("Sekiro sibling challenges are matched independently without affecting reviewed titles", async () => {
+  const { current, original, reviewed, render } = await sekiroRenderingFixture();
+  for (const { runner, entry } of reviewed) {
+    const extra = { title: "Attack Power 1", restrictions: "Unknown future combination", proof: "https://example.com/second-proof" };
+    const pair = { ...entry, challenges: [entry.challenges[0], extra] };
+    const before = JSON.stringify(pair);
+    for (const mode of ["short", "full"]) {
+      const html = render(current, runner, pair, mode);
+      const firstList = render(current, runner, entry, mode).match(/<li>.*?<\/li>/s)[0];
+      const secondList = render(original, runner, { ...entry, challenges: [extra] }, mode).match(/<li>.*?<\/li>/s)[0];
+      assert(html.includes(firstList));
+      assert(html.includes(secondList));
+      assert.equal((html.match(/<li>/g) || []).length, 2);
+    }
+    assert.equal(JSON.stringify(pair), before);
+  }
+});
+
+test("new Sekiro runners require exact reviewed data rather than similar restrictions", async () => {
+  const { current, original, reviewed, render } = await sekiroRenderingFixture();
+  for (const { runner, entry } of reviewed) {
+    const newcomer = { ...runner, id: "new-runner", name: "New Runner" };
+    const sameIdentity = { ...runner, id: newcomer.id, name: newcomer.name };
+    for (const mode of ["short", "full"]) {
+      const existing = render(current, runner, entry, mode).match(/<li>.*?<\/li>/s)[0];
+      assert(render(current, newcomer, entry, mode).includes(existing));
+      for (const restrictions of [entry.challenges[0].restrictions + ", No Deflect", entry.challenges[0].restrictions.toUpperCase()]) {
+        const similar = { ...entry, challenges: [{ ...entry.challenges[0], restrictions }] };
+        assert.equal(render(current, sameIdentity, similar, mode), render(original, sameIdentity, similar, mode));
+      }
+      const hitless = { ...entry, role: "hitless-sage" };
+      assert.equal(render(current, newcomer, hitless, mode), render(original, newcomer, hitless, mode));
+    }
+  }
+});
+
+test("checker-approved labels match individual challenge data and preserve fallback and stored fields", async () => {
+  const { current, original, render } = await sekiroRenderingFixture();
+  const decisions = [
+    ["geori", "ds1", "master", "SL1 NG+6 No Rolling/Blocking/Parrying"],
+    ["reaper8475", "ds1", "legend", "SL1 No Rolling/Blocking/Parrying"],
+    ["sassasallalla23", "sekiro", "elitemaster", "Attack Power 1 Sword Only No Skills"],
+    ["squidofentropy", "sekiro", "legend", "No Skills/Combat Arts + No Items/Buffs"],
+    ["jonathan", "sekiro", "master", "Attack Power 1 + No Prosthetic Tools + No Items/Buffs"],
+  ];
+  for (const [id, game, role, title] of decisions) {
+    const runner = current.cat.runners.find(r => r.id === id);
+    const entry = runner.games.find(e => e.game === game && e.role === role);
+    const challenge = entry.challenges[0];
+    const before = JSON.stringify(runner);
+    const label = current.api.escapeHtml(title).replace(/\//g, "/<wbr>");
+    for (const mode of ["short", "full"]) {
+      const html = render(current, runner, entry, mode);
+      assert(html.includes(`>${label}</`), `${id}: confirmed title`);
+      // Identity is irrelevant when the exact confirmed challenge data matches.
+      assert(render(current, { ...runner, id: "new-identity" }, entry, mode).includes(`>${label}</`));
+      if (id === "jonathan") {
+        assert(html.includes("No Prosthetic Tools"));
+        assert(html.includes("No Items/<wbr>Buffs"));
+        assert(!html.includes("No Skills"));
+      }
+      for (const patch of [
+        { title: challenge.title + " changed" },
+        { restrictions: (challenge.restrictions || "") + " changed" },
+        { proof: "https://example.com/different-proof" },
+      ]) {
+        const changed = { ...entry, challenges: [{ ...challenge, ...patch }] };
+        assert.equal(render(current, runner, changed, mode), render(original, runner, changed, mode), `${id}: changed data fallback`);
+      }
+      const second = { title: "Unreviewed challenge", restrictions: "Unreviewed restrictions", proof: "https://example.com/second" };
+      const pair = { ...entry, challenges: [challenge, second] };
+      const pairHtml = render(current, runner, pair, mode);
+      assert(pairHtml.includes(`>${label}</`));
+      assert(pairHtml.includes(render(original, runner, { ...entry, challenges: [second] }, mode).match(/<li>.*?<\/li>/s)[0]));
+      const hitless = { ...entry, role: "hitless-sage" };
+      assert.equal(render(current, runner, hitless, mode), render(original, runner, hitless, mode));
+    }
+    assert.equal(JSON.stringify(runner), before);
+  }
+});
+
+test("Jonathan's confirmed Sword Only label changes only his matching Sekiro challenge", async () => {
+  const source = fs.readFileSync(require.resolve("../shared.js"), "utf8");
+  const proof = "https://www.youtube.com/playlist?list=PLlouJzco8-bRjG5RQVTa4rN-tQVBXNkgd";
+  const title = "Attack Power 1 + No Prosthetic Tools + No Items/Buffs";
+  const previousSource = source.replace(`"${proof}", "${title}"`, `"${proof}", "Attack Power 1"`);
+  assert.notEqual(previousSource, source);
+  const { current, original, render } = await sekiroRenderingFixture();
+  const previous = (await sekiroRenderingFixture(previousSource)).current;
+  for (const runner of current.cat.runners) for (const entry of runner.games) {
+    for (const mode of ["short", "full"]) {
+      const html = render(current, runner, entry, mode);
+      const oldHtml = render(previous, runner, entry, mode);
+      if (runner.id === "jonathan" && entry.game === "sekiro" && entry.role === "master") {
+        assert.notEqual(html, oldHtml);
+        assert(html.includes(">Attack Power 1 + No Prosthetic Tools + No Items/<wbr>Buffs</"));
+        assert(!html.includes("No Skills"));
+        for (const patch of [
+          { title: "Different challenge" }, { restrictions: "AP1 Sword Only" },
+          { proof: "https://example.com/another-proof" },
+        ]) {
+          const changed = { ...entry, challenges: [{ ...entry.challenges[0], ...patch }] };
+          assert.equal(render(current, runner, changed, mode), render(original, runner, changed, mode));
+        }
+      } else assert.equal(html, oldHtml, `${runner.id}/${entry.game}/${entry.role}: unchanged`);
+    }
+  }
+});
+
+test("14 approved Hitless labels are uniform while regular and all 7 Sekiro Hitless runs stay unchanged", async () => {
+  const source = fs.readFileSync(require.resolve("../shared.js"), "utf8");
+  const previousSource = source.replace('return hitlessDisplayTitles.get(hitlessChallengeKey(runner, entry, challenge)) || "";', 'return "";');
+  assert.notEqual(previousSource, source);
+  const { current, render } = await sekiroRenderingFixture();
+  const previous = (await sekiroRenderingFixture(previousSource)).current;
+  const before = JSON.stringify(current.cat.runners);
+  let approved = 0, pending = 0;
+  for (const runner of current.cat.runners) for (const entry of runner.games) {
+    const isHitless = current.cat.role(entry.role).track === "nohit";
+    const title = isHitless && approvedHitlessTitles.get(`${runner.id}/${entry.game}`);
+    if (title && entry.challenges.length) approved++;
+    if (isHitless && entry.game === "sekiro") pending += entry.challenges.length;
+    for (const mode of ["short", "full"]) {
+      const html = render(current, runner, entry, mode);
+      if (title && entry.challenges.length) {
+        const lists = [...html.matchAll(/<li>.*?<\/li>/gs)].map(m => m[0]);
+        assert.equal(lists.length, 1);
+        assert(lists[0].includes(`>${current.api.escapeHtml(title)}</a>`));
+        assert(lists[0].includes(current.api.escapeHtml(entry.challenges[0].proof)));
+      } else assert.equal(html, render(previous, runner, entry, mode));
+    }
+  }
+  assert.deepEqual({ approved, pending }, { approved: 14, pending: 7 });
+  assert.equal(JSON.stringify(current.cat.runners), before);
+});
+
+test("Hitless matching requires the approved runner, game, role, title, restrictions and proof", async () => {
+  const source = fs.readFileSync(require.resolve("../shared.js"), "utf8");
+  const previousSource = source.replace('return hitlessDisplayTitles.get(hitlessChallengeKey(runner, entry, challenge)) || "";', 'return "";');
+  const { current, render } = await sekiroRenderingFixture();
+  const previous = (await sekiroRenderingFixture(previousSource)).current;
+  for (const runner of current.cat.runners) for (const entry of runner.games) {
+    if (entry.role !== "hitless-sage" || !approvedHitlessTitles.has(`${runner.id}/${entry.game}`)) continue;
+    const challenge = entry.challenges[0];
+    for (const mode of ["short", "full"]) {
+      for (const patch of [
+        { title: (challenge.title || "") + " changed" },
+        { restrictions: (challenge.restrictions || "") + " changed" },
+        { proof: "https://example.com/new-proof" },
+      ]) {
+        const changed = { ...entry, challenges: [{ ...challenge, ...patch }] };
+        assert.equal(render(current, runner, changed, mode), render(previous, runner, changed, mode));
+      }
+      const otherRunner = { ...runner, id: "different-runner" };
+      assert.equal(render(current, otherRunner, entry, mode), render(previous, otherRunner, entry, mode));
+      for (const patch of [{ game: "sekiro" }, { role: "hitless-scholar" }]) {
+        const changed = { ...entry, ...patch };
+        assert.equal(render(current, runner, changed, mode), render(previous, runner, changed, mode));
+      }
+      const extra = { ...challenge, proof: "https://example.com/second-proof" };
+      const pair = { ...entry, challenges: [challenge, extra] };
+      const html = render(current, runner, pair, mode);
+      assert(html.includes(render(current, runner, entry, mode).match(/<li>.*?<\/li>/s)[0]));
+      assert(html.includes(render(previous, runner, { ...entry, challenges: [extra] }, mode).match(/<li>.*?<\/li>/s)[0]));
+      assert.equal((html.match(/<li>/g) || []).length, 2);
+    }
+  }
 });
