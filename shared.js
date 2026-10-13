@@ -303,7 +303,15 @@
 
   async function loadCatalog() {
     const [gameData, runnerData] = await Promise.all([loadJson(PATHS.games), loadJson(PATHS.runners)]);
-    return createCatalog(gameData, runnerData);
+    const catalog = createCatalog(gameData, runnerData);
+    const rules = await Promise.all(gameData.games.filter((g) => g.page).map((g) => loadJson(PATHS.gameRules(g.id))));
+    const titles = new Map(rules.flatMap((r) => (r.tiers || []).map((t) =>
+      [`${r.game}/${t.role}`, new Set((t.challenges || []).map((c) => c.title))]
+    )));
+    catalog.isOfficialChallengeTitle = (entry, challenge) =>
+      titles.get(`${entry.game}/${entry.role}`)?.has(challenge.title) || false;
+    catalog.officialTitles = (game, role) => titles.get(`${game}/${role}`) || new Set();
+    return catalog;
   }
 
   /* ---------- General rules sections (data/rules.json) ---------- */
@@ -350,6 +358,114 @@
   }
 
   /* ---------- Runner component ---------- */
+
+  // Conflicting evidence: retain the existing presentation pending review.
+  const titleReviewEntries = new Set([
+    "unholypancake/des/elitemaster",
+    "geori/ds1/master",
+    "reaper8475/ds1/legend",
+    "sassasallalla23/sekiro/elitemaster",
+  ]);
+
+  // Reviewed Sekiro combinations, supported explicitly by each run's stored
+  // restrictions. These are display labels only; every phrase must still exist
+  // in the appropriate official rules. No fuzzy matching or inferred restrictions.
+  const sekiroDisplayCombinations = new Map([
+    ["legend", "No Prosthetic/Skills/Items", "Demon Bell/Charmless/No revive(base legend restrictions), No Prosthetic, No Buffs/Items, No Skills/Combat Arts, Flawless",
+      ["No Prosthetic Tools", "No Skills/Combat Arts", "No Items/Buffs"]],
+    ["legend", "No Prosthetic/Items/Buffs", "Demon Bell/Charmless/No revive(base legend restrictions), No Prosthetic, No Buffs/Items",
+      ["No Prosthetic Tools", "No Items/Buffs"]],
+    ["legend", "No Skills/Combat Arts", "Demon Bell/Charmless/No revive(base legend restrictions), No Buffs/Items, No Skills/Combat Arts",
+      ["No Skills/Combat Arts", "No Items/Buffs"]],
+    ["legend", "No Skills/Combat Arts", "Demon Bell/Charmless/No revive(base legend restrictions), No Prosthetic, No Buffs/Items, No Skills/Combat Arts",
+      ["No Prosthetic Tools", "No Skills/Combat Arts", "No Items/Buffs"]],
+    ["master", "Attack Power 1", "Attack Power 1Demon Bell/Charmless/No revive(base legend restrictions), No Prosthetic, No Buffs/Items, No Skills/Combat Arts",
+      ["Attack Power 1", "No Prosthetic Tools", "No Skills/Combat Arts", "No Items/Buffs"]],
+    ["master", "Attack Power 1", "Attack power 1, no items, no buffs, no prosthetics, no combat arts (there are skills)",
+      ["Attack Power 1", "No Prosthetic Tools", "No Items/Buffs"]],
+  ].map(([role, title, restrictions, phrases]) =>
+    [JSON.stringify([role, title, restrictions]), phrases]
+  ));
+
+  function confirmedChallengeKey(entry, challenge) {
+    return JSON.stringify([entry.game, entry.role, challenge.title,
+      challenge.restrictions ?? null, challenge.proof ?? null]);
+  }
+
+  // Checker decisions supplied by the user. Match the particular challenge's
+  // original text and proof, never runner identity. Preserve fallback on changes.
+  // The Elite Master label intentionally omits NG+7 per the explicit decision;
+  // it is a presentation exception, not a change to the official rules.
+  const confirmedDisplayTitles = new Map([
+    ["ds1", "master", "SL1 NG+6 No Roll/Rings/Buffs", "SL1 NG+6 No Roll/Rings/Buffs",
+      "https://www.youtube.com/playlist?list=PLwAbGrTTCaCsxca1XSXavoKnNis65Rh_h", "SL1 NG+6 No Rolling/Blocking/Parrying"],
+    ["ds1", "legend", "SL1 No Rolling/Blocking/Parrying", "SL1 No Roll", null,
+      "SL1 No Rolling/Blocking/Parrying"],
+    ["sekiro", "elitemaster", "NG+7 Attack Power 1 Sword Only No Skills", "Attack Power 1 Sword Only No Deflect",
+      "https://youtu.be/Qyj2uGQE8dY", "Attack Power 1 Sword Only No Skills"],
+    ["sekiro", "legend", "No Skills/Items/Buffs", null,
+      "https://www.youtube.com/watch?v=8hIZ8T5MHVk", "No Skills/Combat Arts + No Items/Buffs"],
+    ["sekiro", "master", "Attack Power 1", null,
+      "https://www.youtube.com/playlist?list=PLlouJzco8-bRjG5RQVTa4rN-tQVBXNkgd", "Attack Power 1 + No Prosthetic Tools + No Items/Buffs"],
+  ].map(([game, role, title, restrictions, proof, displayTitle]) =>
+    [confirmedChallengeKey({ game, role }, { title, restrictions, proof }), displayTitle]
+  ));
+
+  function hitlessChallengeKey(runner, entry, challenge) {
+    return JSON.stringify([runner.id, entry.game, entry.role, challenge.title ?? null,
+      challenge.restrictions ?? null, challenge.proof ?? null]);
+  }
+
+  // Explicitly approved Hitless labels. Exact matching keeps other runs,
+  // changed challenges, and all pending Sekiro Hitless entries untouched.
+  const hitlessDisplayTitles = new Map([
+    ["face-man", "des", null, "SL1 Hitless No Sprint Melee Only", "https://www.youtube.com/watch?v=2psUYQB5w_E", "SL1 All Bosses No Sprint Melee Only"],
+    ["adonutirl", "ds1", null, "All Bosses SL1 No Souls Used", "https://www.youtube.com/watch?v=oD8I6cvF83M", "SL1 All Bosses"],
+    ["zeldasouls", "ds1", "SL1 No Roll All Bosses No Hit Rangeless", null, "https://www.youtube.com/watch?v=FU_0J8mWark", "SL1 All Bosses No Roll"],
+    ["dolos6331", "ds2", null, "SL1 +0 Any% Hitless", "https://www.youtube.com/watch?v=i3j0PHj0ri4", "SL1 Any% +0"],
+    ["adonutirl", "ds2", null, "Any% SL1 +0 Company of Champions No Buffs/Peasants Armor", "https://www.youtube.com/watch?v=hIqJTJYleMY", "SL1 Any% +0"],
+    ["cloudi1234", "ds3", null, "sl1 no upgrades/infusions any%", "https://youtu.be/hrZ_kiUM2YU?si=uAwKR2iBGkm9DG75", "SL1 Any% +0"],
+    ["vernonroche4174", "ds3", null, "SL1 No Upgrades/Infusions NG+7 Fresh Start All Bosses", "https://www.youtube.com/watch?v=n29ZLut-0M4&list=PLZ1Oyxn4GOa5NjpHjOVeldKpplaUUVpdU&index=10", "SL1 All Bosses +0 NG+7"],
+    ["lecarbonator", "ds3", null, "SL1 All Bosses, +0 Weapons, No Infusions, No Status Effects, No Offensive Magic", "https://youtu.be/M_6VXQaF5Ks", "SL1 All Bosses +0"],
+    ["admiraljub", "bb", null, "BL4 Any% No Roll/Quickstep Rangeless", "https://youtu.be/7LlaBVv48bw?is=P9NukjBv60w-JJJx", "BL4 Any% No Roll"],
+    ["adonutirl", "bb", null, "All Bosses BL4 No Buffs/Gems", "https://www.youtube.com/watch?v=2UlY1QpSt3s", "BL4 All Bosses"],
+    ["recycle", "er", null, "RL1 All Great Runes | No Upgrades/Talismans/Auxiliary Damage/Status Effects/Infusions, No Great Rune/Physick/Aura/Body/Equipment/Stamina Buffs", "https://www.youtube.com/watch?v=uDFzCZ-86fQ", "RL1 All Great Runes +0"],
+    ["vernonroche4174", "er", null, "RL1 No Upgrades/Infusions", "https://youtu.be/SjepkK3uoyY?si=LeIa3F3HFQ7CaPyr", "RL1 Any% +0"],
+    ["mmmmmhmhmhmmhm", "er", null, "RL1 No Upgrades/Infusions", "https://www.youtube.com/watch?v=GnzAbG5HQps", "RL1 Any% +0"],
+    ["adonutirl", "er", null, "Any% RL1 +0", "https://www.youtube.com/watch?v=6sqSI3k8oig", "RL1 Any% +0"],
+  ].map(([id, game, title, restrictions, proof, displayTitle]) =>
+    [hitlessChallengeKey({ id }, { game, role: "hitless-sage" }, { title, restrictions, proof }), displayTitle]
+  ));
+
+  function officialDisplayTitle(catalog, runner, entry, challenge) {
+    if (catalog.role(entry.role)?.track === "nohit") {
+      return hitlessDisplayTitles.get(hitlessChallengeKey(runner, entry, challenge)) || "";
+    }
+    if (catalog.role(entry.role)?.track !== "onebros") return "";
+    const confirmed = confirmedDisplayTitles.get(confirmedChallengeKey(entry, challenge));
+    if (confirmed) return confirmed;
+    if (entry.game === "sekiro") {
+      // Match the exact reviewed challenge data independently of runner identity
+      // or sibling challenges. Changed/missing text falls back without inference.
+      const phrases = sekiroDisplayCombinations.get(JSON.stringify([
+        entry.role, challenge.title, challenge.restrictions,
+      ]));
+      if (phrases) {
+        const legend = catalog.officialTitles("sekiro", "legend");
+        const master = catalog.officialTitles("sekiro", "master");
+        if (phrases.every((p) => legend.has(p))
+          && (entry.role !== "master" || master.has(phrases[0]))) return phrases.join(" + ");
+      }
+    }
+    return usesOfficialTitle(catalog, runner, entry, challenge) ? challenge.title : "";
+  }
+
+  function usesOfficialTitle(catalog, runner, entry, challenge) {
+    return catalog.role(entry.role)?.track === "onebros"
+      && !titleReviewEntries.has(`${runner.id}/${entry.game}/${entry.role}`)
+      && !(entry.game === "sekiro" && ["legend", "master"].includes(entry.role))
+      && catalog.isOfficialChallengeTitle(entry, challenge);
+  }
 
   function avatarHtml(runner, profile) {
     const initial = escapeHtml((runner.name || "?").trim().charAt(0).toUpperCase());
@@ -428,7 +544,11 @@
         const challengeEntries = [...(entry.challenges || [])];
         if (sortCompleted) challengeEntries.sort(catalog.compareChallengeCompleted);
         const challenges = challengeEntries
-          .map((c) => challengeHtml(c, challengeMode, shortFallback))
+          .map((c) => {
+            const displayTitle = officialDisplayTitle(catalog, runner, entry, c);
+            return challengeHtml(displayTitle ? { ...c, title: displayTitle } : c,
+              displayTitle ? "short" : challengeMode, shortFallback);
+          })
           .filter(Boolean);
         // A role-only run (e.g. a Champion run, which has no challenge title) puts its proof on the
         // role label itself, never on a line of its own: the entry's proof, or else the proof of an
