@@ -279,30 +279,66 @@ code {
   letter-spacing: 0.04em;
 }
 
-/* Game pages: the game's logo, small, beside the brand (on mobile, centred between the brand and
-   the menu button; see the 760px breakpoint). The image keeps its own proportions: it scales down
-   to fit both limits, never cropped or stretched. */
+/* Game-page headers share enough height for the taller Demon's Souls artwork.
+   Keep the header variable on the root so sticky navigation and scroll offsets agree. */
+html:has(body.game-page) {
+  --header-h: 144px;
+}
+
+/* Match Elden Ring's 250px visible width, compensating for each source's dark/clear
+   margins. On narrow screens, the widest source canvas sets a shared safe ink width.
+   Container units measure only the free space between the two header controls. */
 .header-game-logo {
   display: flex;
-  flex: none;
+  flex: 1 1 0;
+  min-width: 0;
   align-items: center;
-  margin: 0 auto 0 20px;
-  padding-left: 20px;
-  border-left: 1px solid var(--border-strong);
+  justify-content: center;
+  margin: 0 12px;
+  container-type: inline-size;
 }
 
 .header-game-logo-img {
+  --header-logo-ink-ratio: 1;
   display: block;
-  width: auto;
+  width: calc(min(250px, 86.686% ) / var(--header-logo-ink-ratio));
+  width: calc(min(250px, 86.686cqw) / var(--header-logo-ink-ratio));
   height: auto;
-  max-width: 200px;
-  max-height: 32px;
+  max-width: 100%;
+  object-fit: contain;
 }
 
-/* The Demon's Souls lettering sits inside wide dark margins, so it gets more height (same width
-   limit) to read at the size of the other logos. It stays well inside the header. */
+/* Visible bounds measured from the original pixels; images retain their proportions. */
 img.header-game-logo-img[src$="des-logo.png"] {
-  max-height: 46px;
+  --header-logo-ink-ratio: 0.919496;
+}
+
+/* Only empty black bands are framed out: all non-black pixels lie in rows 22-152.
+   The 150px window starts at row 18.4, preserving the lettering and its glow. */
+img.header-game-logo-img[src$="ds1-logo.png"] {
+  --header-logo-ink-ratio: 0.866861;
+  aspect-ratio: 1029 / 150;
+  object-fit: cover;
+  object-position: 50% 40%;
+}
+
+img.header-game-logo-img[src$="ds2-logo.png"] {
+  --header-logo-ink-ratio: 0.984720;
+}
+
+/* Bloodborne keeps the existing vertical framing; only horizontal scale changes. */
+img.header-game-logo-img[src$="bb-logo.jpg"] {
+  --header-logo-ink-ratio: 0.922656;
+}
+
+img.header-game-logo-img[src$="sekiro-logo.png"] {
+  --header-logo-ink-ratio: 0.993750;
+}
+
+/* Keep both controls at their natural width when the logo has to shrink. */
+.game-page .site-header .brand,
+.game-page .site-header .nav-toggle {
+  flex-shrink: 0;
 }
 
 /* Logos drawn on black: the black drops out against the header. A blend mode cannot see through
@@ -2235,25 +2271,6 @@ html:has(body.game-page) {
 @media (max-width: 1080px) {
   .nav-toggle {
     display: block;
-  }
-
-  /* Centred in the space between the brand and the menu button. */
-  .header-game-logo {
-    flex: 1 1 0;
-    min-width: 0;
-    justify-content: center;
-    margin: 0 12px;
-    padding-left: 0;
-    border-left: 0;
-  }
-
-  .header-game-logo-img {
-    max-width: min(100%, 200px);
-    max-height: 28px;
-  }
-
-  img.header-game-logo-img[src$="des-logo.png"] {
-    max-height: 42px;
   }
 
   .site-nav {
