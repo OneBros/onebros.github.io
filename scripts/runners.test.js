@@ -120,8 +120,9 @@ test("all four run surfaces use approved titles and preserve pending entries", a
     ["runner.js", { challengeMode: "full", sortCompleted: true, head: false }],
     ["game.js", { challengeMode: "full", sortCompleted: true, showGame: false }],
   ];
-  const excluded = new Set(["unholypancake/des/elitemaster"]);
+  const excluded = new Set();
   const confirmed = new Map([
+    ["unholypancake/des/elitemaster", "SL1 NG+5 PBWT No Sprinting/Rolling/Blocking/Parrying"],
     ["geori/ds1/master", "SL1 NG+6 No Rolling/Blocking/Parrying"],
     ["reaper8475/ds1/legend", "SL1 No Rolling/Blocking/Parrying"],
     ["sassasallalla23/sekiro/elitemaster", "Attack Power 1 Sword Only No Skills"],
@@ -183,7 +184,7 @@ test("all four run surfaces use approved titles and preserve pending entries", a
     }
   }
   assert.equal(JSON.stringify(cat.runners), before);
-  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 53, changed: 39, hitless: 21, pending: 1 });
+  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 54, changed: 40, hitless: 21, pending: 0 });
 });
 
 async function sekiroRenderingFixture(sourceOverride) {
@@ -261,6 +262,7 @@ test("new Sekiro runners require exact reviewed data rather than similar restric
 test("checker-approved labels match individual challenge data and preserve fallback and stored fields", async () => {
   const { current, original, render } = await sekiroRenderingFixture();
   const decisions = [
+    ["unholypancake", "des", "elitemaster", "SL1 NG+5 PBWT No Sprinting/Rolling/Blocking/Parrying"],
     ["geori", "ds1", "master", "SL1 NG+6 No Rolling/Blocking/Parrying"],
     ["reaper8475", "ds1", "legend", "SL1 No Rolling/Blocking/Parrying"],
     ["sassasallalla23", "sekiro", "elitemaster", "Attack Power 1 Sword Only No Skills"],
@@ -462,4 +464,21 @@ test("renamed runner keeps their data, old links resolve and imports reach the s
   const merged = mergeRun(data, [row({ runnerName: "jonglesnorp", gameId: "sekiro", roleId: "hitless-scholar", restrictions: "", proof: "" })], {}, now).runners;
   assert.equal(merged.runners.length, data.runners.length);
   assert.deepEqual(merged.runners.find(r => r.id === "jonglesnorp").formerIds, ["roberto"]);
+});
+
+test("UnholyPancake's DeS Elite Master shows the official No Sprinting title with no extra restrictions", async () => {
+  const { current, render } = await sekiroRenderingFixture();
+  const title = "SL1 NG+5 PBWT No Sprinting/Rolling/Blocking/Parrying";
+  assert(current.cat.officialTitles("des", "elitemaster").has(title));
+  const runner = current.cat.runners.find(r => r.id === "unholypancake");
+  const entry = runner.games.find(e => e.game === "des" && e.role === "elitemaster");
+  const before = JSON.stringify(runner);
+  for (const mode of ["short", "full"]) {
+    const html = render(current, runner, entry, mode);
+    const proof = current.api.escapeHtml(entry.challenges[0].proof);
+    assert(html.includes(`href="${proof}" target="_blank" rel="noopener noreferrer">${current.api.escapeHtml(title).replace(/\//g, "/<wbr>")}</a></li>`));
+    assert(!html.includes("challenge-extras"));
+  }
+  assert.equal(JSON.stringify(runner), before);
+  assert.equal(entry.challenges[0].title, "SL1 NG+5 PBWT +0 No Rolling/Blocking/Parrying");
 });

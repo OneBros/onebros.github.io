@@ -401,6 +401,8 @@
       "https://www.youtube.com/playlist?list=PLwAbGrTTCaCsxca1XSXavoKnNis65Rh_h", "SL1 NG+6 No Rolling/Blocking/Parrying"],
     ["ds1", "legend", "SL1 No Rolling/Blocking/Parrying", "SL1 No Roll", null,
       "SL1 No Rolling/Blocking/Parrying"],
+    ["des", "elitemaster", "SL1 NG+5 PBWT +0 No Rolling/Blocking/Parrying", "SL1 NG+5 PBWT No Sprint/Roll/Block/Parry",
+      "https://youtube.com/playlist?list=PLHrXTGhrnYvRH0fzILndNyhJbmOSeq-bM", "SL1 NG+5 PBWT No Sprinting/Rolling/Blocking/Parrying"],
     ["sekiro", "elitemaster", "NG+7 Attack Power 1 Sword Only No Skills", "Attack Power 1 Sword Only No Deflect",
       "https://youtu.be/Qyj2uGQE8dY", "Attack Power 1 Sword Only No Skills"],
     ["sekiro", "legend", "No Skills/Items/Buffs", null,
