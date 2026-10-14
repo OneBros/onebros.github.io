@@ -279,6 +279,53 @@ code {
   letter-spacing: 0.04em;
 }
 
+/* Game pages: the game's logo, small, beside the brand (on mobile, centred between the brand and
+   the menu button; see the 760px breakpoint). The image keeps its own proportions: it scales down
+   to fit both limits, never cropped or stretched. */
+.header-game-logo {
+  display: flex;
+  flex: none;
+  align-items: center;
+  margin: 0 auto 0 20px;
+  padding-left: 20px;
+  border-left: 1px solid var(--border-strong);
+}
+
+.header-game-logo-img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 200px;
+  max-height: 32px;
+}
+
+/* The Demon's Souls lettering sits inside wide dark margins, so it gets more height (same width
+   limit) to read at the size of the other logos. It stays well inside the header. */
+img.header-game-logo-img[src$="des-logo.png"] {
+  max-height: 46px;
+}
+
+/* Logos drawn on black: the black drops out against the header. A blend mode cannot see through
+   an element's own backdrop-filter, so a header holding a game logo draws the same blur on a
+   layer inside itself instead, and the logo blends with the header's tint. It looks the same. */
+.header-game-logo-img.blend-screen {
+  mix-blend-mode: screen;
+}
+
+.site-header:has(.header-game-logo) {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.site-header:has(.header-game-logo)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
 .site-nav ul {
   list-style: none;
   margin: 0;
@@ -578,7 +625,8 @@ code {
    720). Crop the empty bands above and below, keeping a margin around the letters, so it sizes
    like the other logos on game pages and runner profiles. The image itself is unchanged. */
 img.cover-logo[src$="bb-logo.jpg"],
-img.profile-game-logo[src$="bb-logo.jpg"] {
+img.profile-game-logo[src$="bb-logo.jpg"],
+img.header-game-logo-img[src$="bb-logo.jpg"] {
   aspect-ratio: 1280 / 300;
   object-fit: cover;
   object-position: 50% 46%;
@@ -2181,13 +2229,31 @@ html:has(body.game-page) {
   }
 }
 
-@media (max-width: 760px) {
-  :root {
-    --header-h: 60px;
-  }
-
+/* The site nav collapses into the menu button once brand, game logo and nav no longer fit on
+   one line. Sized from the widest header (a game page with a wide logo), so it is the same on
+   every page; the rest of the mobile layout keeps the 760px breakpoint. */
+@media (max-width: 1080px) {
   .nav-toggle {
     display: block;
+  }
+
+  /* Centred in the space between the brand and the menu button. */
+  .header-game-logo {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    margin: 0 12px;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .header-game-logo-img {
+    max-width: min(100%, 200px);
+    max-height: 28px;
+  }
+
+  img.header-game-logo-img[src$="des-logo.png"] {
+    max-height: 42px;
   }
 
   .site-nav {
@@ -2270,6 +2336,12 @@ html:has(body.game-page) {
   .site-nav .nav-games-menu a:hover,
   .site-nav .nav-games-menu a[aria-current="page"] {
     background: none;
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --header-h: 60px;
   }
 
   .hero {

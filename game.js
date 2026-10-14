@@ -267,27 +267,31 @@
     return `<img class="${cls}${blend}" src="${escapeHtml(src)}"${size} alt="" aria-hidden="true" decoding="async">`;
   }
 
-  /* Cinematic cover from games.json — artwork, logo, or both:
-   *   "hero": { src, width, height, alt, position? }  optional artwork, cropped to fill (object-fit: cover)
-   *   "logo": { src, width, height, blend? }          optional, large and centred
-   * With a logo but no artwork the cover is logo-only, on the page background (.cover--logo).
+  /* Cinematic cover artwork from games.json:
+   *   "hero": { src, width, height, alt, position? }  optional, cropped to fill (object-fit: cover)
    * "position" is an optional CSS object-position (e.g. "center 35%") to keep the key part in view.
-   * Returns whether a logo is shown on the cover (it is then the visible page title). */
+   * The game's logo is shown once, in the header (renderHeaderLogo), never on the cover. */
   function renderCover(game) {
     const hero = game.hero;
     const src = hero && safeUrl(hero.src);
-    const logo = logoImgHtml(game, "cover-logo");
-    if (!src && !logo) return false;
-    const size = src && hero.width && hero.height ? ` width="${Number(hero.width)}" height="${Number(hero.height)}"` : "";
-    const position = src && /^[\w\s.%-]+$/.test(hero.position || "") ? ` style="object-position: ${hero.position}"` : "";
+    if (!src) return;
+    const size = hero.width && hero.height ? ` width="${Number(hero.width)}" height="${Number(hero.height)}"` : "";
+    const position = /^[\w\s.%-]+$/.test(hero.position || "") ? ` style="object-position: ${hero.position}"` : "";
     const cover = $("#game-cover");
-    cover.classList.toggle("cover--logo", !src);
-    cover.innerHTML = `
-      ${src ? `<img class="cover-img" src="${escapeHtml(src)}"${size}${position} alt="${escapeHtml(hero.alt || "")}" fetchpriority="high" decoding="async">` : ""}
-      ${logo}`;
+    cover.innerHTML = `<img class="cover-img" src="${escapeHtml(src)}"${size}${position} alt="${escapeHtml(hero.alt || "")}" fetchpriority="high" decoding="async">`;
     cover.hidden = false;
     $("#overview").classList.add("has-cover");
-    return Boolean(logo);
+  }
+
+  /* The game's logo ("logo": { src, width, height, blend? }) in the site header: beside the brand
+   * on desktop, centred between the brand and the menu button on mobile (see .header-game-logo).
+   * Returns whether a logo is shown (it is then the visible page title). */
+  function renderHeaderLogo(game) {
+    const logo = logoImgHtml(game, "header-game-logo-img");
+    const brand = $(".site-header .brand");
+    if (!logo || !brand) return false;
+    brand.insertAdjacentHTML("afterend", `<span class="header-game-logo">${logo}</span>`);
+    return true;
   }
 
   // Optional full-page artwork from games.json ("pageBackground": { src, position? }), shown behind
@@ -302,9 +306,9 @@
   }
 
   // Page title. The heading text is always in the HTML for screen readers; when the logo is shown
-  // on the cover it is the visible title and the heading is visually hidden.
-  function titleHtml(game, logoOnCover) {
-    return logoOnCover
+  // in the header it is the visible title and the heading is visually hidden.
+  function titleHtml(game, logoInHeader) {
+    return logoInHeader
       ? `<h1 id="game-title" class="sr-only">${escapeHtml(game.title)}</h1>`
       : `<h1 id="game-title" class="game-hero-title">${escapeHtml(game.title)}</h1>`;
   }
@@ -323,7 +327,8 @@
     ].join("");
     document.title = `Onebros - ${game.title}`;
     renderPageBackground(game);
-    const logoOnCover = renderCover(game);
+    renderCover(game);
+    const logoInHeader = renderHeaderLogo(game);
     // Fill a fresh element: the cover appears above it in this same frame, and reusing the
     // placeholder's element would count as that element shifting down (a layout shift).
     const placeholder = $("#game-hero");
@@ -332,7 +337,7 @@
     hero.innerHTML = `
       <p class="breadcrumb"><a href="index.html#games">Games</a> <span aria-hidden="true">/</span> ${escapeHtml(game.short)}</p>
       <p class="eyebrow">Challenge rules &amp; Hall of Fame</p>
-      ${titleHtml(game, logoOnCover)}
+      ${titleHtml(game, logoInHeader)}
       ${game.subtitle ? `<p class="hero-lead">${escapeHtml(game.subtitle)}</p>` : ""}
       <div class="game-overview">
         <dl class="hero-stats">
