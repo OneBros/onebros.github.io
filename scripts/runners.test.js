@@ -391,24 +391,54 @@ test("Hitless matching requires the approved runner, game, role, title, restrict
   }
 });
 
-test("only Recycle's approved Hitless title shows extra restrictions, on all four surfaces", async () => {
+// Runs that show unlinked extra restrictions under their proof-linked title.
+const expectedExtras = new Map([
+  ["recycle/er/hitless-sage", { title: "RL1 All Great Runes +0", extras: ["No Talismans", "No Auxiliary Damage", "No Status Effects"] }],
+  ["zeldasouls/ds1/grandmaster", { title: "SL1 NG+6 +0 Weapon No Rolling/Blocking/Parrying/Auxiliary Effects", extras: ["No Sprint"] }],
+]);
+
+test("only approved runs show extra restrictions, on all four surfaces", async () => {
   const { current } = await sekiroRenderingFixture();
   // Directory and Verified Runs share the default options; Profile and Hall of Fame use full mode.
   const surfaces = [{}, { challengeMode: "full", sortCompleted: true, head: false }, { challengeMode: "full", sortCompleted: true, showGame: false }];
-  let shown = 0;
+  const shown = new Map();
   for (const runner of current.cat.runners) for (const entry of runner.games) for (const opts of surfaces) {
     const html = current.api.runnerCard(current.cat, runner, [entry], opts);
     if (!html.includes('class="challenge-extras"')) continue;
-    assert.equal(`${runner.id}/${entry.game}/${entry.role}`, "recycle/er/hitless-sage");
+    const key = `${runner.id}/${entry.game}/${entry.role}`;
+    const expected = expectedExtras.get(key);
+    assert(expected, key);
     const proof = current.api.escapeHtml(entry.challenges[0].proof);
-    assert(html.includes(`<a class="challenge-link" href="${proof}" target="_blank" rel="noopener noreferrer">RL1 All Great Runes +0</a>`));
+    const title = current.api.escapeHtml(expected.title).replace(/\//g, "/<wbr>");
+    assert(html.includes(`<a class="challenge-link" href="${proof}" target="_blank" rel="noopener noreferrer">${title}</a>`), key);
     const extras = html.match(/<span class="challenge-extras">.*?<\/span><\/span><\/span>/s)[0];
     assert(!extras.includes("<a"));
-    assert.deepEqual([...extras.matchAll(/role="listitem">(.*?)</g)].map(m => m[1]),
-      ["No Talismans", "No Auxiliary Damage", "No Status Effects"]);
-    shown++;
+    assert.deepEqual([...extras.matchAll(/role="listitem">(.*?)</g)].map(m => m[1]), expected.extras);
+    shown.set(key, (shown.get(key) || 0) + 1);
   }
-  assert.equal(shown, surfaces.length);
+  assert.deepEqual(Object.fromEntries(shown), Object.fromEntries([...expectedExtras.keys()].map(k => [k, surfaces.length])));
+});
+
+test("Zelda's No Sprint extra matches only their exact DS1 Grand Master challenge", async () => {
+  const { current, original, render } = await sekiroRenderingFixture();
+  const runner = current.cat.runners.find(r => r.id === "zeldasouls");
+  const entry = runner.games.find(e => e.game === "ds1" && e.role === "grandmaster");
+  const before = JSON.stringify(entry);
+  for (const mode of ["short", "full"]) {
+    const html = render(current, runner, entry, mode);
+    // Same title and proof as before; only the extra restriction is added beneath it.
+    assert.equal(html.replace(/<span class="challenge-extras">.*?<\/span><\/span><\/span>/s, ""), render(original, runner, entry, mode));
+    assert(html.includes('role="listitem">No Sprint</span>'));
+    const challenge = entry.challenges[0];
+    for (const changed of [
+      { ...entry, challenges: [{ ...challenge, title: challenge.title + " changed" }] },
+      { ...entry, challenges: [{ ...challenge, restrictions: "SL1 NG+6 No Sprint" }] },
+      { ...entry, challenges: [{ ...challenge, proof: "https://example.com/other-proof" }] },
+      { ...entry, role: "elitemaster" },
+    ]) assert(!render(current, runner, changed, mode).includes("challenge-extras"));
+    assert(!render(current, { ...runner, id: "other-runner" }, entry, mode).includes("challenge-extras"));
+  }
+  assert.equal(JSON.stringify(entry), before);
 });
 
 test("renamed runner keeps their data, old links resolve and imports reach the same record", () => {

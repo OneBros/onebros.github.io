@@ -445,9 +445,23 @@
     [hitlessChallengeKey({ id }, { game, role: "hitless-sage" }, { title, restrictions, proof }), mainTitle]
   ));
 
-  // Returns { title, extras } for an approved title split as above, or null to show it whole.
+  // Presentation only: restrictions a runner confirmed beyond their run's official title.
+  // The title and stored data stay unchanged; exact matching (same key as above, any role)
+  // shows them only for that challenge.
+  const confirmedExtraRestrictions = new Map([
+    ["zeldasouls", "ds1", "grandmaster", "SL1 NG+6 +0 Weapon No Rolling/Blocking/Parrying/Auxiliary Effects", null,
+      "https://www.youtube.com/playlist?list=PLU311asF84ipK5pDe7-UN937oIc6nIevi", ["No Sprint"]],
+  ].map(([id, game, role, title, restrictions, proof, extras]) =>
+    [hitlessChallengeKey({ id }, { game, role }, { title, restrictions, proof }), extras]
+  ));
+
+  // Returns { title, extras } for an approved title split as above, or for a run shown under its
+  // own title with confirmed extra restrictions; null to show the title alone.
   function splitDisplayTitle(runner, entry, challenge, displayTitle) {
-    const mainTitle = hitlessExtraRestrictionTitles.get(hitlessChallengeKey(runner, entry, challenge));
+    const key = hitlessChallengeKey(runner, entry, challenge);
+    const extras = confirmedExtraRestrictions.get(key);
+    if (extras && displayTitle === challenge.title) return { title: displayTitle, extras };
+    const mainTitle = hitlessExtraRestrictionTitles.get(key);
     if (!mainTitle || !displayTitle.startsWith(`${mainTitle}, `)) return null;
     return { title: mainTitle, extras: displayTitle.slice(mainTitle.length + 2).split(", ") };
   }
