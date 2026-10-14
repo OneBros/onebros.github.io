@@ -1382,6 +1382,49 @@ a.runner-avatar:hover {
   text-decoration: none;
 }
 
+/* Extra restrictions under a challenge title: a hairline, a small label, then the restrictions.
+   Each restriction wraps to the next line as a whole (it breaks inside only when it is wider than
+   the card). Every item carries its "·" in its left padding; the list is pulled left by that
+   padding and clipped, so the dot starting each line is hidden and no line begins or ends with one. */
+.challenge-extras {
+  display: block;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.challenge-extras-label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.challenge-extras-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 2px 0 0 -1.1em;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.challenge-extra {
+  position: relative;
+  min-width: 0;
+  padding-left: 1.1em;
+  overflow-wrap: anywhere;
+}
+
+.challenge-extra::before {
+  content: "·";
+  content: "·" / "";
+  position: absolute;
+  left: 0.4em;
+  color: var(--text-faint);
+}
+
 /* ---------- Tiers ---------- */
 
 .tier-card {
