@@ -429,13 +429,28 @@
     ["lecarbonator", "ds3", null, "SL1 All Bosses, +0 Weapons, No Infusions, No Status Effects, No Offensive Magic", "https://youtu.be/M_6VXQaF5Ks", "SL1 All Bosses +0"],
     ["admiraljub", "bb", null, "BL4 Any% No Roll/Quickstep Rangeless", "https://youtu.be/7LlaBVv48bw?is=P9NukjBv60w-JJJx", "BL4 Any% No Roll"],
     ["adonutirl", "bb", null, "All Bosses BL4 No Buffs/Gems", "https://www.youtube.com/watch?v=2UlY1QpSt3s", "BL4 All Bosses"],
-    ["recycle", "er", null, "RL1 All Great Runes | No Upgrades/Talismans/Auxiliary Damage/Status Effects/Infusions, No Great Rune/Physick/Aura/Body/Equipment/Stamina Buffs", "https://www.youtube.com/watch?v=uDFzCZ-86fQ", "RL1 All Great Runes +0"],
+    ["recycle", "er", null, "RL1 All Great Runes | No Upgrades/Talismans/Auxiliary Damage/Status Effects/Infusions, No Great Rune/Physick/Aura/Body/Equipment/Stamina Buffs", "https://www.youtube.com/watch?v=uDFzCZ-86fQ", "RL1 All Great Runes +0, No Talismans, No Auxiliary Damage, No Status Effects"],
     ["vernonroche4174", "er", null, "RL1 No Upgrades/Infusions", "https://youtu.be/SjepkK3uoyY?si=LeIa3F3HFQ7CaPyr", "RL1 Any% +0"],
     ["mmmmmhmhmhmmhm", "er", null, "RL1 No Upgrades/Infusions", "https://www.youtube.com/watch?v=GnzAbG5HQps", "RL1 Any% +0"],
     ["adonutirl", "er", null, "Any% RL1 +0", "https://www.youtube.com/watch?v=6sqSI3k8oig", "RL1 Any% +0"],
   ].map(([id, game, title, restrictions, proof, displayTitle]) =>
     [hitlessChallengeKey({ id }, { game, role: "hitless-sage" }, { title, restrictions, proof }), displayTitle]
   ));
+
+  // Presentation only: the approved full title above stays the source. These runs show its
+  // leading title as the proof link, and the comma-separated rest as unlinked extra restrictions.
+  const hitlessExtraRestrictionTitles = new Map([
+    ["recycle", "er", null, "RL1 All Great Runes | No Upgrades/Talismans/Auxiliary Damage/Status Effects/Infusions, No Great Rune/Physick/Aura/Body/Equipment/Stamina Buffs", "https://www.youtube.com/watch?v=uDFzCZ-86fQ", "RL1 All Great Runes +0"],
+  ].map(([id, game, title, restrictions, proof, mainTitle]) =>
+    [hitlessChallengeKey({ id }, { game, role: "hitless-sage" }, { title, restrictions, proof }), mainTitle]
+  ));
+
+  // Returns { title, extras } for an approved title split as above, or null to show it whole.
+  function splitDisplayTitle(runner, entry, challenge, displayTitle) {
+    const mainTitle = hitlessExtraRestrictionTitles.get(hitlessChallengeKey(runner, entry, challenge));
+    if (!mainTitle || !displayTitle.startsWith(`${mainTitle}, `)) return null;
+    return { title: mainTitle, extras: displayTitle.slice(mainTitle.length + 2).split(", ") };
+  }
 
   function officialDisplayTitle(catalog, runner, entry, challenge) {
     if (catalog.role(entry.role)?.track === "nohit") {
@@ -489,17 +504,23 @@
     return canonical;
   }
 
-  function challengeHtml(challenge, mode = "short", shortFallback = "") {
+  // extras: restrictions shown unlinked under the title, each wrapping as a whole (see style.css).
+  function challengeHtml(challenge, mode = "short", shortFallback = "", extras = []) {
     const proof = safeUrl(challenge.proof);
     const label = challengeLinkLabel(challenge, mode, proof ? shortFallback : "");
     if (!label) return "";
     // A line-break opportunity after each "/" lets slash-joined restrictions
     // ("Rolling/Blocking/Parrying/…") wrap at the slashes in narrow cards; the text is unchanged.
     const title = escapeHtml(label).replace(/\//g, "/<wbr>");
+    const extrasHtml = extras.length
+      ? `<span class="challenge-extras"><span class="challenge-extras-label">Extra restrictions</span><span class="challenge-extras-list" role="list">${
+          extras.map((r) => `<span class="challenge-extra" role="listitem">${escapeHtml(r)}</span>`).join("")
+        }</span></span>`
+      : "";
     // The challenge title itself is the proof link.
     return proof
-      ? `<li><a class="challenge-link" href="${escapeHtml(proof)}" target="_blank" rel="noopener noreferrer">${title}</a></li>`
-      : `<li><span class="challenge-link is-unlinked">${title}</span></li>`;
+      ? `<li><a class="challenge-link" href="${escapeHtml(proof)}" target="_blank" rel="noopener noreferrer">${title}</a>${extrasHtml}</li>`
+      : `<li><span class="challenge-link is-unlinked">${title}</span>${extrasHtml}</li>`;
   }
 
   /**
@@ -546,8 +567,9 @@
         const challenges = challengeEntries
           .map((c) => {
             const displayTitle = officialDisplayTitle(catalog, runner, entry, c);
-            return challengeHtml(displayTitle ? { ...c, title: displayTitle } : c,
-              displayTitle ? "short" : challengeMode, shortFallback);
+            const split = displayTitle ? splitDisplayTitle(runner, entry, c, displayTitle) : null;
+            return challengeHtml(displayTitle ? { ...c, title: split ? split.title : displayTitle } : c,
+              displayTitle ? "short" : challengeMode, shortFallback, split ? split.extras : []);
           })
           .filter(Boolean);
         // A role-only run (e.g. a Champion run, which has no challenge title) puts its proof on the

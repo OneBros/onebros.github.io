@@ -326,7 +326,13 @@
     }
     initGamesMenu(catalog);
 
-    const runner = catalog.runners.find((r) => r.id === runnerId);
+    // Links made before a runner's id changed still open their page, under the current id.
+    const runner =
+      catalog.runners.find((r) => r.id === runnerId) ||
+      catalog.runners.find((r) => (r.formerIds || []).includes(runnerId));
+    if (runner && runner.id !== runnerId) {
+      history.replaceState(null, "", catalog.runnerPageUrl(runner.id));
+    }
     if (!runner) {
       renderNotFound(
         runnerId ? "We couldn't find that runner." : "Choose a runner to view their verified runs."

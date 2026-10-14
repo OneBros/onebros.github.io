@@ -85,11 +85,22 @@ const approvedHitlessTitles = new Map([
   ["lecarbonator/ds3", "SL1 All Bosses +0"],
   ["admiraljub/bb", "BL4 Any% No Roll"],
   ["adonutirl/bb", "BL4 All Bosses"],
-  ["recycle/er", "RL1 All Great Runes +0"],
+  ["recycle/er", "RL1 All Great Runes +0, No Talismans, No Auxiliary Damage, No Status Effects"],
   ["vernonroche4174/er", "RL1 Any% +0"],
   ["mmmmmhmhmhmmhm/er", "RL1 Any% +0"],
   ["adonutirl/er", "RL1 Any% +0"],
 ]);
+
+// Approved titles shown as a linked main title with unlinked extra restrictions below it.
+const splitHitlessTitles = new Map([["recycle/er", "RL1 All Great Runes +0"]]);
+function assertHitlessTitle(api, html, key, title, end = "</") {
+  const main = splitHitlessTitles.get(key);
+  if (!main) return assert(html.includes(`>${api.escapeHtml(title)}${end}`), key);
+  assert(title.startsWith(`${main}, `), key);
+  assert(html.includes(`>${api.escapeHtml(main)}</a><span class="challenge-extras"><span class="challenge-extras-label">Extra restrictions</span>`), key);
+  const extras = [...html.matchAll(/<span class="challenge-extra" role="listitem">(.*?)<\/span>/g)].map(m => m[1]);
+  assert.deepEqual(extras, title.slice(main.length + 2).split(", ").map(api.escapeHtml), key);
+}
 
 test("all four run surfaces use approved titles and preserve pending entries", async () => {
   const source = fs.readFileSync(require.resolve("../shared.js"), "utf8");
@@ -158,7 +169,7 @@ test("all four run surfaces use approved titles and preserve pending entries", a
       const html = api.runnerCard(cat, runner, [entry], opts);
       const hitlessTitle = isHitless && approvedHitlessTitles.get(`${runner.id}/${entry.game}`);
       if (hitlessTitle && entry.challenges.length) {
-        assert(html.includes(`>${api.escapeHtml(hitlessTitle)}</`), `${file}: approved Hitless title`);
+        assertHitlessTitle(api, html, `${runner.id}/${entry.game}`, hitlessTitle);
       } else if (isHitless || isExcluded) {
         assert.equal(html, previous.api.runnerCard(previous.cat, runner, [entry], opts));
       } else for (const challenge of entry.challenges) {
@@ -172,7 +183,7 @@ test("all four run surfaces use approved titles and preserve pending entries", a
     }
   }
   assert.equal(JSON.stringify(cat.runners), before);
-  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 52, changed: 38, hitless: 21, pending: 1 });
+  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 53, changed: 39, hitless: 21, pending: 1 });
 });
 
 async function sekiroRenderingFixture(sourceOverride) {
@@ -338,7 +349,7 @@ test("14 approved Hitless labels are uniform while regular and all 7 Sekiro Hitl
       if (title && entry.challenges.length) {
         const lists = [...html.matchAll(/<li>.*?<\/li>/gs)].map(m => m[0]);
         assert.equal(lists.length, 1);
-        assert(lists[0].includes(`>${current.api.escapeHtml(title)}</a>`));
+        assertHitlessTitle(current.api, lists[0], `${runner.id}/${entry.game}`, title, "</a>");
         assert(lists[0].includes(current.api.escapeHtml(entry.challenges[0].proof)));
       } else assert.equal(html, render(previous, runner, entry, mode));
     }
@@ -378,4 +389,47 @@ test("Hitless matching requires the approved runner, game, role, title, restrict
       assert.equal((html.match(/<li>/g) || []).length, 2);
     }
   }
+});
+
+test("only Recycle's approved Hitless title shows extra restrictions, on all four surfaces", async () => {
+  const { current } = await sekiroRenderingFixture();
+  // Directory and Verified Runs share the default options; Profile and Hall of Fame use full mode.
+  const surfaces = [{}, { challengeMode: "full", sortCompleted: true, head: false }, { challengeMode: "full", sortCompleted: true, showGame: false }];
+  let shown = 0;
+  for (const runner of current.cat.runners) for (const entry of runner.games) for (const opts of surfaces) {
+    const html = current.api.runnerCard(current.cat, runner, [entry], opts);
+    if (!html.includes('class="challenge-extras"')) continue;
+    assert.equal(`${runner.id}/${entry.game}/${entry.role}`, "recycle/er/hitless-sage");
+    const proof = current.api.escapeHtml(entry.challenges[0].proof);
+    assert(html.includes(`<a class="challenge-link" href="${proof}" target="_blank" rel="noopener noreferrer">RL1 All Great Runes +0</a>`));
+    const extras = html.match(/<span class="challenge-extras">.*?<\/span><\/span><\/span>/s)[0];
+    assert(!extras.includes("<a"));
+    assert.deepEqual([...extras.matchAll(/role="listitem">(.*?)</g)].map(m => m[1]),
+      ["No Talismans", "No Auxiliary Damage", "No Status Effects"]);
+    shown++;
+  }
+  assert.equal(shown, surfaces.length);
+});
+
+test("renamed runner keeps their data, old links resolve and imports reach the same record", () => {
+  const data = JSON.parse(fs.readFileSync(require.resolve("../data/runners.json"), "utf8"));
+  const runner = data.runners.find(r => r.id === "jonglesnorp");
+  assert.equal(runner.name, "lord stupid idiot poop fuck");
+  assert.deepEqual(runner.formerIds, ["roberto"]);
+  assert.equal(runner.avatar, "assets/runners/roberto.png");
+  assert.equal(runner.profile, "https://www.youtube.com/@jonglesnorp/featured");
+  assert.deepEqual(runner.games[0], { game: "sekiro", role: "hitless-scholar", challenges: [] });
+  assert.deepEqual(runner.games[1], { game: "ds3", role: "master", addedAt: "2026-10-14T10:03:11Z", challenges: [{
+    title: "SL1 NG+7 No Rolling/Blocking/Parrying", restrictions: "SL1 NG+7 No Roll/Block/Parry",
+    proof: "https://www.youtube.com/playlist?list=PLJMEYBql88d0", completedAt: "2026-10-01" }] });
+  assert.equal(runner.games.length, 2);
+  assert(!data.runners.some(r => r.id === "roberto"));
+  // A former id may not name another runner or be claimed twice.
+  const other = { ...data.runners.find(r => r.id !== runner.id) };
+  assert.throws(() => validateRunners({ runners: [runner, { ...other, formerIds: [runner.id] }] }), /already in use/);
+  assert.throws(() => validateRunners({ runners: [runner, { ...other, formerIds: ["roberto"] }] }), /already in use/);
+  // The tracker's Discord username matches the new id, so a re-import updates this runner.
+  const merged = mergeRun(data, [row({ runnerName: "jonglesnorp", gameId: "sekiro", roleId: "hitless-scholar", restrictions: "", proof: "" })], {}, now).runners;
+  assert.equal(merged.runners.length, data.runners.length);
+  assert.deepEqual(merged.runners.find(r => r.id === "jonglesnorp").formerIds, ["roberto"]);
 });
