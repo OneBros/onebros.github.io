@@ -183,7 +183,7 @@ test("all four run surfaces use approved titles and preserve pending entries", a
     }
   }
   assert.equal(JSON.stringify(cat.runners), before);
-  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 52, changed: 38, hitless: 21, pending: 1 });
+  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 53, changed: 39, hitless: 21, pending: 1 });
 });
 
 async function sekiroRenderingFixture(sourceOverride) {
@@ -409,4 +409,27 @@ test("only Recycle's approved Hitless title shows extra restrictions, on all fou
     shown++;
   }
   assert.equal(shown, surfaces.length);
+});
+
+test("renamed runner keeps their data, old links resolve and imports reach the same record", () => {
+  const data = JSON.parse(fs.readFileSync(require.resolve("../data/runners.json"), "utf8"));
+  const runner = data.runners.find(r => r.id === "jonglesnorp");
+  assert.equal(runner.name, "lord stupid idiot poop fuck");
+  assert.deepEqual(runner.formerIds, ["roberto"]);
+  assert.equal(runner.avatar, "assets/runners/roberto.png");
+  assert.equal(runner.profile, "https://www.youtube.com/@jonglesnorp/featured");
+  assert.deepEqual(runner.games[0], { game: "sekiro", role: "hitless-scholar", challenges: [] });
+  assert.deepEqual(runner.games[1], { game: "ds3", role: "master", addedAt: "2026-10-14T10:03:11Z", challenges: [{
+    title: "SL1 NG+7 No Rolling/Blocking/Parrying", restrictions: "SL1 NG+7 No Roll/Block/Parry",
+    proof: "https://www.youtube.com/playlist?list=PLJMEYBql88d0", completedAt: "2026-10-01" }] });
+  assert.equal(runner.games.length, 2);
+  assert(!data.runners.some(r => r.id === "roberto"));
+  // A former id may not name another runner or be claimed twice.
+  const other = { ...data.runners.find(r => r.id !== runner.id) };
+  assert.throws(() => validateRunners({ runners: [runner, { ...other, formerIds: [runner.id] }] }), /already in use/);
+  assert.throws(() => validateRunners({ runners: [runner, { ...other, formerIds: ["roberto"] }] }), /already in use/);
+  // The tracker's Discord username matches the new id, so a re-import updates this runner.
+  const merged = mergeRun(data, [row({ runnerName: "jonglesnorp", gameId: "sekiro", roleId: "hitless-scholar", restrictions: "", proof: "" })], {}, now).runners;
+  assert.equal(merged.runners.length, data.runners.length);
+  assert.deepEqual(merged.runners.find(r => r.id === "jonglesnorp").formerIds, ["roberto"]);
 });

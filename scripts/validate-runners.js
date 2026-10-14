@@ -30,13 +30,15 @@ function proofKey(value) {
 }
 
 function validateRunners(data, catalog = JSON.parse(fs.readFileSync(path.join(__dirname, "../data/games.json"), "utf8"))) {
-  const errors = [], ids = new Set(), names = new Set();
+  const errors = [], ids = new Set(), names = new Set(), formerIds = [];
   if (!Array.isArray(data.runners)) throw new Error("runners must be an array");
   for (const r of data.runners) {
     const name = String(r.name || "").trim().toLowerCase();
     if (!r.id || ids.has(r.id)) errors.push(`Duplicate/empty runner id: ${r.id}`);
     if (!name || names.has(name)) errors.push(`Duplicate/empty runner name: ${r.name}`);
     ids.add(r.id); names.add(name);
+    if (r.formerIds !== undefined && !Array.isArray(r.formerIds)) errors.push(`${r.id}: formerIds must be an array`);
+    for (const old of r.formerIds || []) formerIds.push([old, r.id]);
     if (!validAddedAt(r.addedAt)) errors.push(`${r.id}: invalid addedAt`);
     const entries = new Set();
     for (const e of r.games || []) {
@@ -57,6 +59,12 @@ function validateRunners(data, catalog = JSON.parse(fs.readFileSync(path.join(__
         challenges.add(identity);
       }
     }
+  }
+  // A former id keeps old runner links working, so it must never name another runner.
+  const seenFormer = new Set();
+  for (const [old, id] of formerIds) {
+    if (typeof old !== "string" || !old || ids.has(old) || seenFormer.has(old)) errors.push(`${id}: former id "${old}" is empty or already in use`);
+    seenFormer.add(old);
   }
   if (errors.length) throw new Error(errors.join("\n"));
   return data;

@@ -53,6 +53,9 @@ Append an object to the **end** of the `runners` array in `runners.json`:
 ```
 
 - `id`: unique, lowercase, no spaces.
+- `formerIds` (optional): ids this runner had before a rename, e.g. `["roberto"]`. Old
+  `runner.html?runner=<former id>` links open the runner's page and switch to the current id.
+  A former id may never be another runner's id.
 - `avatar`: profile picture path or URL (local files go in `assets/runners/`). Shown as a circle
   (cropped by CSS only). If it is empty or fails to load, the runner's initial is shown.
 - `profile`: an external page for this runner (normally YouTube, or a Team Hitless profile).

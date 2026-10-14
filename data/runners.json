@@ -158,8 +158,9 @@
       ]
     },
     {
-      "id": "roberto",
-      "name": "RobertoBobertoRabordoBatordo",
+      "id": "jonglesnorp",
+      "formerIds": ["roberto"],
+      "name": "lord stupid idiot poop fuck",
       "avatar": "assets/runners/roberto.png",
       "profile": "https://www.youtube.com/@jonglesnorp/featured",
       "addedAt": "2026-09-28",
@@ -168,6 +169,19 @@
           "game": "sekiro",
           "role": "hitless-scholar",
           "challenges": []
+        },
+        {
+          "game": "ds3",
+          "role": "master",
+          "addedAt": "2026-10-14T10:03:11Z",
+          "challenges": [
+            {
+              "title": "SL1 NG+7 No Rolling/Blocking/Parrying",
+              "restrictions": "SL1 NG+7 No Roll/Block/Parry",
+              "proof": "https://www.youtube.com/playlist?list=PLJMEYBql88d0",
+              "completedAt": "2026-10-01"
+            }
+          ]
         }
       ]
     },
