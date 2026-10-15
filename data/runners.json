@@ -62,7 +62,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "BL4 Any% No Roll/Quickstep Rangeless",
+              "title": "BL4 Any%",
+              "restrictions": "No Roll, No Quickstep, Rangeless",
               "proof": "https://youtu.be/7LlaBVv48bw?is=P9NukjBv60w-JJJx",
               "completedAt": "2026-07-02"
             }
@@ -138,7 +139,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "RL1 All Great Runes | No Upgrades/Talismans/Auxiliary Damage/Status Effects/Infusions, No Great Rune/Physick/Aura/Body/Equipment/Stamina Buffs",
+              "title": "RL1 All Great Runes",
+              "restrictions": "+0, No Talismans, No Auxiliary Damage, No Status Effects, No Infusions, No Great Rune Buffs, No Physick Buffs, No Aura Buffs, No Body Buffs, No Equipment Buffs, No Stamina Buffs",
               "proof": "https://www.youtube.com/watch?v=uDFzCZ-86fQ",
               "completedAt": "2026-01-18"
             }
@@ -168,7 +170,14 @@
         {
           "game": "sekiro",
           "role": "hitless-scholar",
-          "challenges": []
+          "challenges": [
+            {
+              "title": "Shura Ending",
+              "restrictions": "No Kuro's Charm",
+              "proof": "https://youtu.be/W62u3DBqVQI",
+              "completedAt": "2026-09-28"
+            }
+          ]
         },
         {
           "game": "ds3",
@@ -197,7 +206,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "sl1 no upgrades/infusions any%",
+              "title": "SL1 Any%",
+              "restrictions": "+0, No Infusions",
               "proof": "https://youtu.be/hrZ_kiUM2YU?si=uAwKR2iBGkm9DG75",
               "completedAt": "2026-03-15"
             }
@@ -208,7 +218,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "AP1 sword only no deflect shura",
+              "title": "Shura Ending",
+              "restrictions": "Attack Power 1, Sword Only, No Deflect",
               "proof": "https://youtu.be/yqecib666Ds?si=xO8TmyyRPq1ygrxy",
               "completedAt": "2024-02-22"
             }
@@ -228,7 +239,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "All Beads & Memories AP1 NKC + DB Sword Only No Skills Hitless",
+              "title": "All Beads & Memories",
+              "restrictions": "Attack Power 1, No Kuro's Charm, Demon Bell, Sword Only, No Skills",
               "proof": "https://youtu.be/CWmqohMpjQ4",
               "completedAt": "2025-10-02"
             }
@@ -260,7 +272,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "Attack Power 1, No Kuro’s Charm, Demon Bell, Sword Only No Skills",
+              "title": "Shura Ending",
+              "restrictions": "Attack Power 1, No Kuro's Charm, Demon Bell, Sword Only, No Skills",
               "proof": "https://youtu.be/sUwaDxLIcNE?si=QV14CRWco1rCNEGI",
               "completedAt": "2025-04-11"
             }
@@ -280,7 +293,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "RL1 No Upgrades/Infusions",
+              "title": "RL1 Any%",
+              "restrictions": "+0, No Infusions",
               "proof": "https://youtu.be/SjepkK3uoyY?si=LeIa3F3HFQ7CaPyr",
               "completedAt": "2025-11-17"
             }
@@ -291,7 +305,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "SL1 No Upgrades/Infusions NG+7 Fresh Start All Bosses",
+              "title": "SL1 All Bosses",
+              "restrictions": "NG+7, +0, No Infusions, Fresh Start",
               "proof": "https://www.youtube.com/watch?v=n29ZLut-0M4&list=PLZ1Oyxn4GOa5NjpHjOVeldKpplaUUVpdU&index=10",
               "completedAt": "2025-11-10"
             }
@@ -302,7 +317,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "Purification Ending USB",
+              "title": "Purification Ending",
+              "restrictions": "Attack Power 1, No Kuro's Charm, Demon Bell",
               "proof": "https://www.youtube.com/watch?v=SbVT9Xu0U0Q&list=PLZ1Oyxn4GOa5NjpHjOVeldKpplaUUVpdU&index=21",
               "completedAt": "2023-11-26"
             }
@@ -322,7 +338,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "SL1 +0 Any% Hitless",
+              "title": "SL1 Any%",
+              "restrictions": "+0",
               "proof": "https://www.youtube.com/watch?v=i3j0PHj0ri4",
               "completedAt": "2026-04-21"
             }
@@ -342,7 +359,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "mmortal Severance Ending UDB, Sword only , No Hit/No Damage.",
+              "title": "Immortal Severance Ending",
+              "restrictions": "Attack Power 1, No Kuro's Charm, Demon Bell, Sword Only, No Damage",
               "proof": "https://youtu.be/wE7hnodIcVY?si=14BvondtE0S2lOtU",
               "completedAt": "2025-12-25"
             }
@@ -362,7 +380,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "SL1 All Bosses, +0 Weapons, No Infusions, No Status Effects, No Offensive Magic",
+              "title": "SL1 All Bosses",
+              "restrictions": "+0, No Infusions, No Auxiliary Effects, No Status Damage, No Offensive Magic",
               "proof": "https://youtu.be/M_6VXQaF5Ks",
               "completedAt": "2023-12-01"
             }
@@ -382,7 +401,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "RL1 No Upgrades/Infusions",
+              "title": "RL1 Any%",
+              "restrictions": "+0, No Infusions",
               "proof": "https://www.youtube.com/watch?v=GnzAbG5HQps",
               "completedAt": "2026-02-12"
             }
@@ -574,7 +594,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "Ap1, Demon Bell, No Kuro’s Charm, Sword Only, no Skills",
+              "title": "Shura Ending",
+              "restrictions": "Attack Power 1, No Kuro's Charm, Demon Bell, Sword Only, No Skills",
               "proof": "https://youtu.be/7T5zObdd4Vc?si=4G5aAv7ePB5FO7uo",
               "completedAt": "2026-05-24"
             }
@@ -1215,7 +1236,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "SL1 Hitless No Sprint Melee Only",
+              "title": "SL1 All Bosses",
+              "restrictions": "No Sprint, Melee Only",
               "proof": "https://www.youtube.com/watch?v=2psUYQB5w_E",
               "completedAt": "2025-02-19"
             }
@@ -1235,7 +1257,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "All Bosses BL4 No Buffs/Gems",
+              "title": "BL4 All Bosses",
+              "restrictions": "No Buffs/Gems",
               "proof": "https://www.youtube.com/watch?v=2UlY1QpSt3s",
               "completedAt": "2025-12-27"
             }
@@ -1246,7 +1269,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "Any% SL1 +0 Company of Champions No Buffs/Peasants Armor",
+              "title": "SL1 Any%",
+              "restrictions": "+0, Company of Champions, No Buffs/Peasants Armor",
               "proof": "https://www.youtube.com/watch?v=hIqJTJYleMY",
               "completedAt": "2025-04-27"
             }
@@ -1257,7 +1281,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "All Bosses SL1 No Souls Used",
+              "title": "SL1 All Bosses",
+              "restrictions": "No Souls Used",
               "proof": "https://www.youtube.com/watch?v=oD8I6cvF83M",
               "completedAt": "2024-06-06"
             }
@@ -1268,7 +1293,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "restrictions": "Any% RL1 +0",
+              "title": "RL1 Any%",
+              "restrictions": "+0",
               "proof": "https://www.youtube.com/watch?v=6sqSI3k8oig",
               "completedAt": "2024-10-14"
             }
@@ -1400,7 +1426,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "title": "All Bosses & Minibosses + Beads Sword Only No Skills No Hit/Damage",
+              "title": "All Bosses & Minibosses + Beads",
+              "restrictions": "Sword Only, No Skills, No Damage",
               "proof": "https://www.youtube.com/watch?v=2hwVVQsHR6k",
               "completedAt": "2026-10-09"
             }
@@ -1420,7 +1447,8 @@
           "role": "hitless-sage",
           "challenges": [
             {
-              "title": "SL1 No Roll All Bosses No Hit Rangeless",
+              "title": "SL1 All Bosses",
+              "restrictions": "No Roll, Rangeless",
               "proof": "https://www.youtube.com/watch?v=FU_0J8mWark",
               "completedAt": "2026-03-21"
             }

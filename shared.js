@@ -582,6 +582,13 @@
         if (sortCompleted) challengeEntries.sort(catalog.compareChallengeCompleted);
         const challenges = challengeEntries
           .map((c) => {
+            // Use separately stored Hitless fields directly, in both cards and profiles.
+            // Unstructured legacy text keeps its existing presentation without guessing
+            // categories or splitting restrictions into inferred pieces.
+            if (role?.track === "nohit" && String(c.title || "").trim()
+              && String(c.restrictions || "").trim()) {
+              return challengeHtml(c, "short", shortFallback, [c.restrictions]);
+            }
             const displayTitle = officialDisplayTitle(catalog, runner, entry, c);
             const split = displayTitle ? splitDisplayTitle(runner, entry, c, displayTitle) : null;
             return challengeHtml(displayTitle ? { ...c, title: split ? split.title : displayTitle } : c,
