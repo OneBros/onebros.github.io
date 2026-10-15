@@ -90,6 +90,10 @@
   }
 
   function linkButton(url, label) {
+    const logo = label === "Team Hitless" ? "team-hitless" : label === "YouTube" ? "youtube" : "";
+    if (logo) {
+      return `<a class="profile-service-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(label)} (opens in a new tab)" title="${escapeHtml(label)} (opens in a new tab)"><img class="profile-service-logo is-${logo}" src="assets/brands/${logo}.png" alt="" aria-hidden="true" decoding="async"></a>`;
+    }
     return `<a class="btn btn-ghost" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`;
   }
 

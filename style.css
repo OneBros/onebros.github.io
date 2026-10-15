@@ -776,6 +776,38 @@ img.header-game-logo-img[src$="bb-logo.jpg"] {
   margin-top: 36px;
 }
 
+.profile-service-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 88px;
+  max-width: 100%;
+  border-radius: 6px;
+  transition: background-color .2s ease;
+}
+
+.profile-service-link:hover {
+  background-color: rgba(255, 255, 255, .06);
+}
+
+.profile-service-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.profile-service-logo {
+  display: block;
+  object-fit: contain;
+  width: 112px;
+  height: 64px;
+}
+
+.profile-service-logo.is-team-hitless {
+  width: 160px;
+  height: 80px;
+}
+
 .hero-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 180px));

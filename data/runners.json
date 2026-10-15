@@ -198,6 +198,30 @@
               "completedAt": "2026-10-01"
             }
           ]
+        },
+        {
+          "game": "des",
+          "role": "master",
+          "challenges": [
+            {
+              "title": "SL1 NG+5 PBWT No Rolling/Blocking/Parrying",
+              "restrictions": "No Rings, No Items",
+              "proof": "https://youtube.com/playlist?list=PLVSresNA4CEhPd_Fg9lBCDDqZHdoDGQ_o",
+              "completedAt": "2026-03-16"
+            }
+          ]
+        },
+        {
+          "game": "sekiro",
+          "role": "master",
+          "addedAt": "2026-10-15T11:09:37Z",
+          "challenges": [
+            {
+              "title": "",
+              "proof": "https://www.youtube.com/playlist?list=PLVSresNA4CEiJH1-awHdwF-ByYY8kIvq9",
+              "completedAt": "2026-03-08"
+            }
+          ]
         }
       ]
     },
@@ -1235,7 +1259,7 @@
       "id": "face-man",
       "name": "FACE MAN",
       "avatar": "assets/runners/face-man.jpg",
-      "profile": "https://www.youtube.com/@FACE-MAN",
+      "profile": "https://www.teamhitless.com/project/face-man/",
       "addedAt": "2026-10-06",
       "games": [
         {
@@ -1256,7 +1280,7 @@
       "id": "adonutirl",
       "name": "Donut",
       "avatar": "assets/runners/adonutirl.jpg",
-      "profile": "https://www.youtube.com/@adonutirl",
+      "profile": "https://www.teamhitless.com/project/adonutirl/",
       "addedAt": "2026-10-06",
       "games": [
         {
@@ -1446,7 +1470,7 @@
       "id": "zeldasouls",
       "name": "Zelda",
       "avatar": "assets/staff/zeldasouls.jpg",
-      "profile": "https://www.youtube.com/channel/UCQ19Tqp7U6VzxC4V4m2gR9g",
+      "profile": "https://www.teamhitless.com/project/zelda/",
       "addedAt": "2026-10-13",
       "games": [
         {
@@ -1491,6 +1515,38 @@
               "title": "SL1 NG+7 No Rolling/Blocking/Parrying/Rings/Buffs",
               "proof": "https://www.youtube.com/playlist?list=PLU311asF84iogjUwYPq76giqz5rDffPPT",
               "completedAt": "2023-07-01"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tomkokkas",
+      "name": "TomKokkas",
+      "avatar": "assets/staff/tomkokkas.jpg",
+      "profile": "https://www.teamhitless.com/project/TomKokkas/",
+      "addedAt": "2026-10-15T09:19:02Z",
+      "games": [
+        {
+          "game": "des",
+          "role": "hitless-sage",
+          "challenges": [
+            {
+              "title": "SL1 All Bosses",
+              "restrictions": "Melee Only, No Roll, No Magic",
+              "proof": "https://youtu.be/G_QmDbmUtOc",
+              "completedAt": "2026-08-15"
+            }
+          ]
+        },
+        {
+          "game": "des",
+          "role": "master",
+          "challenges": [
+            {
+              "title": "SL1 NG+5 PBWT No Rolling/Blocking/Parrying",
+              "proof": "https://www.youtube.com/playlist?list=PLj8Fm_77T12DwOvDUG7QnR_88LSfterOZ",
+              "completedAt": "2026-09-23"
             }
           ]
         }

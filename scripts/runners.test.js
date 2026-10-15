@@ -159,7 +159,7 @@ test("all four run surfaces use approved titles and preserve pending entries", a
           }
         } else if (combination) {
           for (const phrase of combination.split(" + ")) assert(cat.officialTitles("sekiro", "legend").has(phrase));
-        } else assert(cat.isOfficialChallengeTitle(entry, challenge), `${runner.id}/${entry.game}/${entry.role}`);
+        } else if (challenge.title) assert(cat.isOfficialChallengeTitle(entry, challenge), `${runner.id}/${entry.game}/${entry.role}`);
         safe++;
         if (combination || (confirmedTitle && confirmedTitle !== challenge.title)
           || (challenge.restrictions && challenge.restrictions !== challenge.title)) changed++;
@@ -190,7 +190,7 @@ test("all four run surfaces use approved titles and preserve pending entries", a
     }
   }
   assert.equal(JSON.stringify(cat.runners), before);
-  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 54, changed: 40, hitless: 23, pending: 0 });
+  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 57, changed: 41, hitless: 24, pending: 0 });
 });
 
 async function sekiroRenderingFixture(sourceOverride) {
@@ -360,7 +360,7 @@ test("Jonathan's confirmed Sword Only label changes only his matching Sekiro cha
   }
 });
 
-test("all 23 Hitless challenges use stored titles and extras", async () => {
+test("all 24 Hitless challenges use stored titles and extras", async () => {
   const source = fs.readFileSync(require.resolve("../shared.js"), "utf8");
   const previousSource = source.replace('return hitlessDisplayTitles.get(hitlessChallengeKey(runner, entry, challenge)) || "";', 'return "";');
   assert.notEqual(previousSource, source);
@@ -391,7 +391,7 @@ test("all 23 Hitless challenges use stored titles and extras", async () => {
       } else assert.equal(html, render(previous, runner, entry, mode));
     }
   }
-  assert.deepEqual({ structured, pending }, { structured: 23, pending: 0 });
+  assert.deepEqual({ structured, pending }, { structured: 24, pending: 0 });
   assert.equal(JSON.stringify(current.cat.runners), before);
 });
 
@@ -450,6 +450,9 @@ test("structured Hitless fields and approved runs show extra restrictions, on al
   const shown = new Map();
   for (const runner of current.cat.runners) for (const entry of runner.games) for (const opts of surfaces) {
     const html = current.api.runnerCard(current.cat, runner, [entry], opts);
+    if (current.cat.role(entry.role).track !== "nohit" && !expectedExtras.has(`${runner.id}/${entry.game}/${entry.role}`)) {
+      assert(!html.includes('class="challenge-extras"'), `${runner.id}/${entry.game}/${entry.role}`);
+    }
     if (!html.includes('class="challenge-extras"')) continue;
     const key = `${runner.id}/${entry.game}/${entry.role}`;
     const expected = expectedByEntry.get(key);
@@ -465,7 +468,7 @@ test("structured Hitless fields and approved runs show extra restrictions, on al
   assert.deepEqual(Object.fromEntries(shown), Object.fromEntries([...expectedByEntry.keys()].map(k => [k, surfaces.length])));
 });
 
-test("Zelda's No Sprint extra matches only their exact DS1 Grand Master challenge", async () => {
+test("confirmed extras display without exposing other normal tier restrictions or changing data", async () => {
   const { current, original, render } = await sekiroRenderingFixture();
   const runner = current.cat.runners.find(r => r.id === "zeldasouls");
   const entry = runner.games.find(e => e.game === "ds1" && e.role === "grandmaster");
@@ -500,7 +503,7 @@ test("renamed runner keeps their data, old links resolve and imports reach the s
   assert.deepEqual(runner.games[1], { game: "ds3", role: "master", addedAt: "2026-10-14T10:03:11Z", challenges: [{
     title: "SL1 NG+7 No Rolling/Blocking/Parrying", restrictions: "SL1 NG+7 No Roll/Block/Parry",
     proof: "https://www.youtube.com/playlist?list=PLJMEYBql88d0", completedAt: "2026-10-01" }] });
-  assert.equal(runner.games.length, 2);
+  assert.equal(runner.games.length, 4);
   assert(!data.runners.some(r => r.id === "roberto"));
   // A former id may not name another runner or be claimed twice.
   const other = { ...data.runners.find(r => r.id !== runner.id) };
@@ -527,4 +530,27 @@ test("UnholyPancake's DeS Elite Master shows the official No Sprinting title wit
   }
   assert.equal(JSON.stringify(runner), before);
   assert.equal(entry.challenges[0].title, "SL1 NG+5 PBWT +0 No Rolling/Blocking/Parrying");
+});
+
+
+test("untitled tier challenge keeps its proof on the role and its completion date", async () => {
+  const { current } = await sekiroRenderingFixture();
+  const runner = current.cat.runners.find(r => r.id === "jonglesnorp");
+  const entry = runner.games.find(e => e.game === "sekiro" && e.role === "master");
+  assert.equal(entry.challenges.length, 1);
+  assert.equal(entry.challenges[0].title, "");
+  assert.equal(entry.challenges[0].restrictions, undefined);
+  assert.equal(entry.challenges[0].completedAt, "2026-03-08");
+  const before = JSON.stringify(runner);
+  for (const opts of [{ background: true }, { challengeMode: "full", sortCompleted: true, head: false, showGame: false }]) {
+    const html = current.api.runnerCard(current.cat, runner, [entry], opts);
+    assert(html.includes('href="' + entry.challenges[0].proof + '" target="_blank" rel="noopener noreferrer">Master</a>'));
+    assert(!html.includes("challenge-list"));
+    assert(!html.includes("challenge-extras"));
+    assert(!html.includes("Pending"));
+    assert(html.includes("tier-master"));
+  }
+  assert.equal(current.cat.entries().sort(current.cat.compareVerifiedEntry)[0].entry, entry);
+  assert.equal(current.cat.entryCompletedAt(entry), "2026-03-08");
+  assert.equal(JSON.stringify(runner), before);
 });
