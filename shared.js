@@ -214,6 +214,37 @@
         return pairs.reduce((sum, { entry }) => sum + Math.max(1, (entry.challenges || []).length), 0);
       },
 
+      // Profile cards and artwork share one order: highest existing effective level,
+      // total verified completions across all tiers, then Games menu order.
+      profileGameGroups(runner) {
+        const byGame = new Map();
+        for (const entry of runner.games || []) {
+          if (!byGame.has(entry.game)) byGame.set(entry.game, []);
+          byGame.get(entry.game).push(entry);
+        }
+        const groups = [...byGame].map(([game, entries]) => ({
+          game,
+          entries,
+          level: Math.max(...entries.map(entry => catalog.effectiveLevel(entry.role))),
+          count: catalog.completionCount(entries.map(entry => ({ entry }))),
+        }));
+        return groups.sort((a, b) => b.level - a.level || catalog.compareGameRunCounts(a, b));
+      },
+
+      compareGameRunCounts(a, b) {
+        return b.count - a.count ||
+          (gameIndex.get(a.game) ?? games.length) - (gameIndex.get(b.game) ?? games.length);
+      },
+
+      // Directory rows keep tier priority across games, using the profile game
+      // ranking to break ties. Counts include all of the runner's game entries.
+      profileCardEntries(runner, entries = runner.games || []) {
+        const groups = new Map(catalog.profileGameGroups(runner).map(group => [group.game, group]));
+        return [...entries].sort((a, b) =>
+          catalog.effectiveLevel(b.role) - catalog.effectiveLevel(a.role) ||
+          catalog.compareGameRunCounts(groups.get(a.game), groups.get(b.game)));
+      },
+
       /** When this game/role entry was added to the site: the entry's own addedAt, else the runner's.
        * completedAt is never used here, so verified historical runs still show as recent additions. */
       entryVerifiedAt(entry, runner) {
@@ -371,6 +402,8 @@
   // restrictions. These are display labels only; every phrase must still exist
   // in the appropriate official rules. No fuzzy matching or inferred restrictions.
   const sekiroDisplayCombinations = new Map([
+    ["master", "Attack Power 1 + No Prosthetic Tools + No Items/Buffs", undefined,
+      ["Attack Power 1", "No Prosthetic Tools", "No Items/Buffs"]],
     ["legend", "No Prosthetic/Skills/Items", "Demon Bell/Charmless/No revive(base legend restrictions), No Prosthetic, No Buffs/Items, No Skills/Combat Arts, Flawless",
       ["No Prosthetic Tools", "No Skills/Combat Arts", "No Items/Buffs"]],
     ["legend", "No Prosthetic/Items/Buffs", "Demon Bell/Charmless/No revive(base legend restrictions), No Prosthetic, No Buffs/Items",
@@ -553,12 +586,14 @@
    * opts.head: false omits the picture and name (the runner page already shows them).
    * opts.showGame: false omits the game name on each row (the runner page titles the game once).
    * opts.sortCompleted: profiles and Hall of Fame sort by tier/completion and date their challenges.
+   * opts.profileOrder: Runners directory uses profile game priority for tier ties and artwork.
    */
   function runnerCard(catalog, runner, entries = runner.games || [], opts = {}) {
-    const { highlight = () => false, background = false, challengeMode = "short", head = true, showGame = true, sortCompleted = false } = opts;
+    const { highlight = () => false, background = false, challengeMode = "short", head = true, showGame = true, sortCompleted = false, profileOrder = false } = opts;
     const pageUrl = catalog.runnerPageUrl(runner.id);
     const name = escapeHtml(runner.name);
-    const sorted = [...entries].sort(sortCompleted ? catalog.compareEntryCompleted : catalog.compareEntryTier);
+    const sorted = profileOrder ? catalog.profileCardEntries(runner, entries)
+      : [...entries].sort(sortCompleted ? catalog.compareEntryCompleted : catalog.compareEntryTier);
     const topRole = sorted[0] ? catalog.role(sorted[0].role) : null;
     // Background artwork is the game of the first row, which is the highest tier.
     const top = background ? sorted[0] || null : null;

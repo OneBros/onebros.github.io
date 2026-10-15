@@ -58,7 +58,7 @@
       ? runners
           .map((runner) => {
             const shown = withStaffIdentity(runner, staffForRunner(staffPeople, runner));
-            return runnerCard(catalog, shown, shown.games || [], { background: true });
+            return runnerCard(catalog, shown, shown.games || [], { background: true, profileOrder: true });
           })
           .join("")
       : `<p class="empty">No runners match these filters.</p>`;

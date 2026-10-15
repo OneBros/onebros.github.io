@@ -122,6 +122,7 @@ test("all four run surfaces use approved titles and preserve pending entries", a
   ];
   const excluded = new Set();
   const confirmed = new Map([
+    ["jonglesnorp/sekiro/master", "Attack Power 1 + No Prosthetic Tools + No Items/Buffs"],
     ["unholypancake/des/elitemaster", "SL1 NG+5 PBWT No Sprinting/Rolling/Blocking/Parrying"],
     ["geori/ds1/master", "SL1 NG+6 No Rolling/Blocking/Parrying"],
     ["reaper8475/ds1/legend", "SL1 No Rolling/Blocking/Parrying"],
@@ -210,6 +211,126 @@ async function sekiroRenderingFixture(sourceOverride) {
   const render = (fixture, runner, entry, mode) => fixture.api.runnerCard(fixture.cat, runner, [entry], { challengeMode: mode });
   return { current, original, reviewed, render };
 }
+
+const profileEntry = (game, role, count = 1) => ({ game, role,
+  challenges: Array.from({ length: count }, () => ({ title: "Test run", completedAt: "2020-01-01" })) });
+
+test("profile games prioritize highest existing tier over run count and menu order", async () => {
+  const { current: { cat } } = await sekiroRenderingFixture();
+  const runner = { games: [profileEntry("des", "master", 8), profileEntry("er", "grandmaster")] };
+  assert.deepEqual(Array.from(cat.profileGameGroups(runner), g => g.game), ["er", "des"]);
+  const roles = ["grandmaster", "elitemaster", "master", "legend", "hitless-sage", "hitless-scholar", "champion"];
+  for (let i = 1; i < roles.length; i++) {
+    const games = [profileEntry("des", roles[i], 8), profileEntry("er", roles[i - 1])];
+    assert.equal(cat.profileGameGroups({ games })[0].game, "er");
+  }
+});
+
+test("profile tier ties count every challenge across all tiers using existing verified counts", async () => {
+  const { current: { cat } } = await sekiroRenderingFixture();
+  const runner = { games: [profileEntry("des", "master", 2), profileEntry("er", "master"),
+    profileEntry("er", "champion", 2), profileEntry("er", "hitless-sage")] };
+  const before = JSON.stringify(runner);
+  const groups = cat.profileGameGroups(runner);
+  assert.deepEqual(Array.from(groups, g => [g.game, g.count]), [["er", 4], ["des", 2]]);
+  assert.equal(groups[0].entries.length, 3);
+  assert.equal(groups.reduce((sum, g) => sum + g.count, 0), cat.completionCount(runner.games.map(entry => ({ entry }))));
+  assert.equal(JSON.stringify(runner), before);
+  assert.equal(cat.profileGameGroups({ games: [{ game: "des", role: "master" }] })[0].count, 1);
+});
+
+test("profile tier and count ties follow Games menu order regardless of dates or input order", async () => {
+  const { current: { cat } } = await sekiroRenderingFixture();
+  const games = [...cat.games].reverse().map(g => profileEntry(g.id, "master", 2));
+  games[0].challenges[0].completedAt = "2026-10-15";
+  games[0].addedAt = "2026-10-15T12:00:00Z";
+  assert.deepEqual(Array.from(cat.profileGameGroups({ games }), g => g.game), Array.from(cat.games, g => g.id));
+  assert.equal(cat.profileGameGroups({ games: [] }).length, 0);
+});
+
+test("runner profile uses the same ranked groups for background and cards without changing data or Home order", async () => {
+  const { current: { cat, api } } = await sekiroRenderingFixture();
+  const runner = { id: "profile-order-test", name: "Profile test", profile: "https://www.youtube.com/@example",
+    addedAt: "2026-01-01", games: [profileEntry("des", "master"), profileEntry("er", "master"),
+      profileEntry("er", "champion", 2), profileEntry("sekiro", "hitless-sage")] };
+  cat.runners.push(runner);
+  const before = JSON.stringify(cat.runners);
+  const recent = Array.from(cat.entries().sort(cat.compareVerifiedEntry), pair => pair.entry);
+  const nodes = new Map(["#runner-hero", "#runner-content"].map(id => [id, { innerHTML: "" }]));
+  const properties = new Map(), classes = new Set();
+  let init;
+  const ctx = { URL, URLSearchParams, Image: class { addEventListener() {} }, console,
+    document: { querySelector: () => null, addEventListener: (_, callback) => { init = callback; },
+      body: { style: { setProperty: (key, value) => properties.set(key, value) },
+        classList: { add: value => classes.add(value) } } },
+    window: { location: { search: "?runner=profile-order-test", hash: "" },
+      OneBros: { ...api, $: selector => nodes.get(selector), loadCatalog: async () => cat,
+        loadJson: async () => null, initChrome() {}, initGamesMenu() {}, bindAvatarFallback() {} } } };
+  vm.createContext(ctx);
+  vm.runInContext(fs.readFileSync(require.resolve("../runner.js"), "utf8"), ctx);
+  await init();
+  const html = nodes.get("#runner-content").innerHTML;
+  const banners = [...html.matchAll(/class="profile-game-banner" href="([^"]+)"/g)].map(m => m[1]);
+  assert.deepEqual(banners, ["er", "des", "sekiro"].map(id => api.escapeHtml(cat.gamePageUrl(id))));
+  assert.equal((html.match(/<section class="profile-game">/g) || []).length, 3);
+  assert.equal(properties.get("--page-bg"), `url("${api.safeUrl(cat.game("er").pageBackground.src)}")`);
+  assert(classes.has("has-page-bg"));
+  assert.equal(JSON.stringify(cat.runners), before);
+  assert.deepEqual(Array.from(cat.entries().sort(cat.compareVerifiedEntry), pair => pair.entry), recent);
+});
+
+test("directory rows use effective tier, total game completions and menu order without grouping lower tiers first", async () => {
+  const { current: { cat, api } } = await sekiroRenderingFixture();
+  const runner = { id: "directory-test", name: "Directory test", games: [
+    profileEntry("er", "champion", 3), profileEntry("des", "champion"),
+    profileEntry("ds3", "master"), profileEntry("des", "grandmaster"),
+    profileEntry("er", "master"), profileEntry("ds1", "master"),
+    profileEntry("sekiro", "hitless-sage"), profileEntry("bb", "hitless-scholar"),
+  ] };
+  const before = JSON.stringify(runner);
+  const expected = [runner.games[3], runner.games[4], runner.games[5], runner.games[2],
+    runner.games[6], runner.games[7], runner.games[0], runner.games[1]];
+  assert.deepEqual(Array.from(cat.profileCardEntries(runner)), expected);
+  const html = api.runnerCard(cat, runner, runner.games, { background: true, profileOrder: true });
+  assert(html.includes(cat.game("des").cardBackground.src));
+  const tied = { ...runner, games: runner.games.filter(e => e.role !== "grandmaster") };
+  assert.equal(cat.profileCardEntries(tied)[0].game, cat.profileGameGroups(tied)[0].game);
+  assert.equal(cat.profileCardEntries(tied)[0].game, "er");
+  assert(api.runnerCard(cat, tied, tied.games, { background: true, profileOrder: true }).includes(cat.game("er").cardBackground.src));
+  assert.equal(cat.profileCardEntries({ games: [] }).length, 0);
+  assert.equal(JSON.stringify(runner), before);
+});
+
+test("Runners enables profile ordering inside cards while preserving directory order and filtering", async () => {
+  const { current: { cat, api } } = await sekiroRenderingFixture();
+  const before = JSON.stringify(cat.runners);
+  const recent = Array.from(cat.entries().sort(cat.compareVerifiedEntry), p => p.entry);
+  const nodes = new Map(["#runners-grid", "#results-count", "#filter-search", "#filter-game", "#filter-role"]
+    .map(id => [id, { innerHTML: "", value: "", addEventListener() {} }]));
+  const calls = [];
+  let init;
+  const ctx = { console, document: { addEventListener: (_, callback) => { init = callback; } },
+    window: { OneBros: { ...api, $: selector => nodes.get(selector), loadCatalog: async () => cat,
+      loadJson: async () => null, initChrome() {}, initGamesMenu() {}, populateRunnerFilters() {}, bindAvatarFallback() {},
+      runnerCard(catalog, runner, entries, opts) {
+        calls.push({ runner, entries, opts });
+        return api.runnerCard(catalog, runner, entries, opts);
+      } } } };
+  vm.createContext(ctx);
+  vm.runInContext(fs.readFileSync(require.resolve("../runners.js"), "utf8"), ctx);
+  await init();
+  assert.deepEqual(calls.map(c => c.runner.id), Array.from([...cat.runners].sort(cat.compareRunnerCompleted), r => r.id));
+  for (const { runner, entries, opts } of calls) {
+    assert.equal(opts.background, true);
+    assert.equal(opts.profileOrder, true);
+    assert.equal(entries.length, runner.games.length);
+    const sorted = cat.profileCardEntries(runner, entries);
+    assert.equal(sorted[0]?.game, cat.profileGameGroups(runner)[0]?.game);
+  }
+  assert.equal(JSON.stringify(cat.runners), before);
+  assert.deepEqual(Array.from(cat.entries().sort(cat.compareVerifiedEntry), p => p.entry), recent);
+  assert(!fs.readFileSync(require.resolve("../script.js"), "utf8").includes("profileOrder"));
+});
 
 test("structured Hitless fields render consistently without runner or proof identity matching", async () => {
   const { current, render } = await sekiroRenderingFixture();
@@ -533,19 +654,28 @@ test("UnholyPancake's DeS Elite Master shows the official No Sprinting title wit
 });
 
 
-test("untitled tier challenge keeps its proof on the role and its completion date", async () => {
+test("jonglesnorp's confirmed Sekiro Master title renders on Home and profile with its original metadata", async () => {
   const { current } = await sekiroRenderingFixture();
   const runner = current.cat.runners.find(r => r.id === "jonglesnorp");
   const entry = runner.games.find(e => e.game === "sekiro" && e.role === "master");
   assert.equal(entry.challenges.length, 1);
-  assert.equal(entry.challenges[0].title, "");
+  const title = "Attack Power 1 + No Prosthetic Tools + No Items/Buffs";
+  assert.equal(entry.challenges[0].title, title);
+  assert.equal(entry.role, "master");
+  assert.equal(entry.addedAt, "2026-10-15T11:09:37Z");
+  assert.equal(runner.addedAt, "2026-09-28");
+  assert.equal(entry.challenges[0].proof, "https://www.youtube.com/playlist?list=PLVSresNA4CEiJH1-awHdwF-ByYY8kIvq9");
+  assert(current.cat.officialTitles("sekiro", "master").has("Attack Power 1"));
+  for (const phrase of ["No Prosthetic Tools", "No Items/Buffs"]) {
+    assert(current.cat.officialTitles("sekiro", "legend").has(phrase));
+  }
   assert.equal(entry.challenges[0].restrictions, undefined);
   assert.equal(entry.challenges[0].completedAt, "2026-03-08");
   const before = JSON.stringify(runner);
   for (const opts of [{ background: true }, { challengeMode: "full", sortCompleted: true, head: false, showGame: false }]) {
     const html = current.api.runnerCard(current.cat, runner, [entry], opts);
-    assert(html.includes('href="' + entry.challenges[0].proof + '" target="_blank" rel="noopener noreferrer">Master</a>'));
-    assert(!html.includes("challenge-list"));
+    assert(html.includes('href="' + entry.challenges[0].proof + '" target="_blank" rel="noopener noreferrer">' + title.replace(/\//g, "/<wbr>") + '</a>'));
+    assert(html.includes("challenge-list"));
     assert(!html.includes("challenge-extras"));
     assert(!html.includes("Pending"));
     assert(html.includes("tier-master"));

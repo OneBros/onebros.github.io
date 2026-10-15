@@ -206,10 +206,9 @@
   }
 
   // Full-page artwork, as on game pages (body.has-page-bg): the pageBackground of the game holding
-  // the runner's highest tier. Without artwork, or if it fails to load, the normal site background stays.
+  // the first ranked profile game. Without artwork, or if it fails to load, the normal site background stays.
   function renderPageBackground(catalog, runner) {
-    const entries = runner.games || [];
-    const top = entries.length ? [...entries].sort(catalog.compareEntryTier)[0] : null;
+    const top = catalog.profileGameGroups(runner)[0];
     const art = top ? gameArt(catalog.game(top.game), ["pageBackground", "cardBackground"]) : null;
     if (!art || !art.src) return;
     const body = document.body;
@@ -255,24 +254,10 @@
   }
 
   function renderRuns(catalog, runner) {
-    const entries = runner.games || [];
-    const byGame = new Map();
-    for (const entry of entries) {
-      if (!byGame.has(entry.game)) byGame.set(entry.game, []);
-      byGame.get(entry.game).push(entry);
-    }
-    const order = new Map(catalog.games.map((g, i) => [g.id, i]));
-    const highest = (group) =>
-      group.reduce((top, entry) => (catalog.compareEntryCompleted(entry, top) < 0 ? entry : top));
-    // Keep game groups: highest tier first, then Games menu order.
-    const groups = [...byGame.entries()].sort((a, b) => {
-      const byTier = catalog.compareEntryCompleted(highest(a[1]), highest(b[1]));
-      if (byTier) return byTier;
-      return (order.get(a[0]) ?? 99) - (order.get(b[0]) ?? 99);
-    });
+    const groups = catalog.profileGameGroups(runner);
     const body = groups.length
       ? groups
-          .map(([gameId, group]) => {
+          .map(({ game: gameId, entries: group }) => {
             // No card artwork: the game banner above the card already shows it.
             const card = runnerCard(catalog, runner, group, {
               challengeMode: "full",
