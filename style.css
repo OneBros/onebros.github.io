@@ -2153,12 +2153,18 @@ html:has(body.game-page) {
   border-radius: var(--radius);
 }
 
-.restriction-group.is-allowed {
+.restriction-group.is-allowed,
+.rule-panel.is-allowed {
   --tier: var(--ok);
 }
 
-.restriction-group.is-banned {
+.restriction-group.is-banned,
+.rule-panel.is-banned {
   --tier: var(--danger);
+}
+
+.rule-panel:is(.is-allowed, .is-banned) summary .rule-panel-title {
+  color: var(--tier);
 }
 
 .restriction-group .subhead {

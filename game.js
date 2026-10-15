@@ -78,7 +78,7 @@
       <details class="rule-panel rule-card is-tier ${cls}" id="${escapeHtml(id)}"${open ? " open" : ""}>
         <summary>
           <span class="rule-panel-heading">
-            <span class="tier-label">${escapeHtml(label)}</span>
+            ${label ? `<span class="tier-label">${escapeHtml(label)}</span>` : ""}
             <span class="rule-panel-title${icon ? " has-icon" : ""}">${escapeHtml(title)}${icon}</span>
           </span>
           <span class="rule-panel-icon" aria-hidden="true"></span>
@@ -196,18 +196,18 @@
       sections.push({
         id: "restrictions",
         nav: "Banned Equipment",
-        eyebrow: "Equipment and strategies",
+        eyebrow: "Banned Equipment",
         title: r.title,
         body: `
-          <div class="restriction-grid">
+          <div class="rules-accordion">
             ${(r.groups || [])
-              .map(
-                (g) => `
-              <div class="restriction-group is-${escapeHtml(g.type)}">
-                <h3 class="subhead">${escapeHtml(g.title)}</h3>
-                ${listHtml(g.items)}
-              </div>`
-              )
+              .map((g) => ruleCardHtml({
+                id: `restrictions-${slugify(g.type)}`,
+                cls: `is-${escapeHtml(g.type)}`,
+                title: g.title,
+                open: false,
+                body: listHtml(g.items),
+              }))
               .join("")}
           </div>`,
       });

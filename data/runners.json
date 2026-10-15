@@ -55,7 +55,14 @@
         {
           "game": "bb",
           "role": "hitless-scholar",
-          "challenges": []
+          "challenges": [
+            {
+              "title": "BL4 Any%",
+              "restrictions": "Rangeless",
+              "proof": "https://youtu.be/A4C_SOOaRqk",
+              "completedAt": "2026-05-31"
+            }
+          ]
         },
         {
           "game": "bb",

@@ -190,7 +190,7 @@ test("all four run surfaces use approved titles and preserve pending entries", a
     }
   }
   assert.equal(JSON.stringify(cat.runners), before);
-  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 54, changed: 40, hitless: 22, pending: 0 });
+  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 54, changed: 40, hitless: 23, pending: 0 });
 });
 
 async function sekiroRenderingFixture(sourceOverride) {
@@ -360,7 +360,7 @@ test("Jonathan's confirmed Sword Only label changes only his matching Sekiro cha
   }
 });
 
-test("all 22 Hitless challenges use stored titles and extras", async () => {
+test("all 23 Hitless challenges use stored titles and extras", async () => {
   const source = fs.readFileSync(require.resolve("../shared.js"), "utf8");
   const previousSource = source.replace('return hitlessDisplayTitles.get(hitlessChallengeKey(runner, entry, challenge)) || "";', 'return "";');
   assert.notEqual(previousSource, source);
@@ -391,7 +391,7 @@ test("all 22 Hitless challenges use stored titles and extras", async () => {
       } else assert.equal(html, render(previous, runner, entry, mode));
     }
   }
-  assert.deepEqual({ structured, pending }, { structured: 22, pending: 0 });
+  assert.deepEqual({ structured, pending }, { structured: 23, pending: 0 });
   assert.equal(JSON.stringify(current.cat.runners), before);
 });
 
