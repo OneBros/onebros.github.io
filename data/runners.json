@@ -807,6 +807,18 @@
               "completedAt": "2026-07-17"
             }
           ]
+        },
+        {
+          "challenges": [
+            {
+              "proof": "https://youtube.com/playlist?list=PLKNqV2PlcJXA40Wc5LfgVMNj2Btcx1QHy&si=GvS_I0BzwJEF0cBA",
+              "title": "SL1 No Rolling/Blocking/Parrying",
+              "completedAt": "2026-05-27"
+            }
+          ],
+          "addedAt": "2026-10-21T17:48:54Z",
+          "role": "legend",
+          "game": "ds1"
         }
       ]
     },
@@ -1547,6 +1559,27 @@
               "title": "SL1 NG+5 PBWT No Rolling/Blocking/Parrying",
               "proof": "https://www.youtube.com/playlist?list=PLj8Fm_77T12DwOvDUG7QnR_88LSfterOZ",
               "completedAt": "2026-09-23"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "acacia-vix",
+      "name": "Acacia Vix",
+      "avatar": "assets/runners/acacia-vix.jpg",
+      "profile": "https://www.youtube.com/@AcaciaVix",
+      "addedAt": "2026-10-21T17:58:07Z",
+      "games": [
+        {
+          "game": "ds2",
+          "role": "master",
+          "challenges": [
+            {
+              "title": "SL1 CoC NG+7 No Roll/Block/Parry",
+              "restrictions": "SL1 NG+7 CoC No Roll/Block/Parry",
+              "proof": "https://youtube.com/playlist?list=PLU6CQAUHrWDV06DDcd-M-sKOM7Z0VE3NW&si=ePLv05PQ58fJZtzU",
+              "completedAt": "2026-05-03"
             }
           ]
         }
