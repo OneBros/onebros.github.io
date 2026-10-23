@@ -191,7 +191,7 @@ test("all four run surfaces use approved titles and preserve pending entries", a
     }
   }
   assert.equal(JSON.stringify(cat.runners), before);
-  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 59, changed: 42, hitless: 24, pending: 0 });
+  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 59, changed: 42, hitless: 25, pending: 0 });
 });
 
 async function sekiroRenderingFixture(sourceOverride) {
@@ -481,7 +481,7 @@ test("Jonathan's confirmed Sword Only label changes only his matching Sekiro cha
   }
 });
 
-test("all 24 Hitless challenges use stored titles and extras", async () => {
+test("all 25 Hitless challenges use stored titles and extras", async () => {
   const source = fs.readFileSync(require.resolve("../shared.js"), "utf8");
   const previousSource = source.replace('return hitlessDisplayTitles.get(hitlessChallengeKey(runner, entry, challenge)) || "";', 'return "";');
   assert.notEqual(previousSource, source);
@@ -512,7 +512,7 @@ test("all 24 Hitless challenges use stored titles and extras", async () => {
       } else assert.equal(html, render(previous, runner, entry, mode));
     }
   }
-  assert.deepEqual({ structured, pending }, { structured: 24, pending: 0 });
+  assert.deepEqual({ structured, pending }, { structured: 25, pending: 0 });
   assert.equal(JSON.stringify(current.cat.runners), before);
 });
 
@@ -681,7 +681,7 @@ test("jonglesnorp's confirmed Sekiro Master title renders on Home and profile wi
     assert(html.includes("tier-master"));
   }
   assert.equal(current.cat.entries().sort(current.cat.compareVerifiedEntry)[0].entry,
-    current.cat.runners.find(r => r.id === "acacia-vix").games.find(e => e.game === "ds2" && e.role === "master"));
+    current.cat.runners.find(r => r.id === "adonutirl").games.find(e => e.game === "ds3" && e.role === "hitless-sage"));
   assert.equal(current.cat.entryCompletedAt(entry), "2026-03-08");
   assert.equal(JSON.stringify(runner), before);
 });

@@ -1342,6 +1342,19 @@
               "completedAt": "2024-10-14"
             }
           ]
+        },
+        {
+          "game": "ds3",
+          "role": "hitless-sage",
+          "addedAt": "2026-10-23T09:13:23Z",
+          "challenges": [
+            {
+              "title": "SL1 All Bosses",
+              "restrictions": "+0, No Infusions, No Rings, No Bleed",
+              "proof": "https://youtu.be/PqvP1X-5lpU",
+              "completedAt": "2026-08-27"
+            }
+          ]
         }
       ]
     },
