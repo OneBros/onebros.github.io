@@ -102,14 +102,26 @@
     {
       "id": "papa-alivo",
       "name": "PAPA ALIVO",
-      "avatar": "",
-      "profile": null,
+      "avatar": "assets/runners/papa-alivo.jpg",
+      "profile": "https://www.youtube.com/@MustafaSouls",
       "addedAt": "2026-04-19",
       "games": [
         {
           "game": "er",
           "role": "champion",
           "challenges": []
+        },
+        {
+          "game": "ds3",
+          "role": "grandmaster",
+          "addedAt": "2026-10-26T11:04:43Z",
+          "challenges": [
+            {
+              "title": "SL1 NG+7 +0 Weapon No Rolling/Blocking/Parrying/Infusions/Auxiliary Effects/Buffs",
+              "proof": "https://www.youtube.com/playlist?list=PLuIIS8WVq4OVsYhB2J3BOIjbYUmnO8iAK",
+              "completedAt": "2025-10-18"
+            }
+          ]
         }
       ]
     },

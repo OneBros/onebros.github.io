@@ -191,7 +191,7 @@ test("all four run surfaces use approved titles and preserve pending entries", a
     }
   }
   assert.equal(JSON.stringify(cat.runners), before);
-  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 59, changed: 42, hitless: 25, pending: 0 });
+  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 60, changed: 42, hitless: 25, pending: 0 });
 });
 
 async function sekiroRenderingFixture(sourceOverride) {
@@ -553,6 +553,7 @@ test("Hitless matching requires the approved runner, game, role, title, restrict
 const expectedExtras = new Map([
   ["recycle/er/hitless-sage", { title: "RL1 All Great Runes +0", extras: ["No Talismans", "No Auxiliary Damage", "No Status Effects"] }],
   ["zeldasouls/ds1/grandmaster", { title: "SL1 NG+6 +0 Weapon No Rolling/Blocking/Parrying/Auxiliary Effects", extras: ["No Sprint"] }],
+  ["papa-alivo/ds3/grandmaster", { title: "SL1 NG+7 +0 Weapon No Rolling/Blocking/Parrying/Infusions/Auxiliary Effects/Buffs", extras: ["No Sprint"] }],
 ]);
 
 test("structured Hitless fields and approved runs show extra restrictions, on all four surfaces", async () => {
@@ -609,6 +610,34 @@ test("confirmed extras display without exposing other normal tier restrictions o
     assert(!render(current, { ...runner, id: "other-runner" }, entry, mode).includes("challenge-extras"));
   }
   assert.equal(JSON.stringify(entry), before);
+});
+
+test("PAPA ALIVO's DS3 Grand Master keeps the official title with No Sprint as an extra and the existing runner record", async () => {
+  const { current, original, render } = await sekiroRenderingFixture();
+  const runner = current.cat.runners.find(r => r.id === "papa-alivo");
+  assert.equal(runner.name, "PAPA ALIVO");
+  assert.equal(runner.avatar, "assets/runners/papa-alivo.jpg");
+  assert(fs.existsSync(require.resolve(`../${runner.avatar}`)));
+  assert.equal(runner.profile, "https://www.youtube.com/@MustafaSouls");
+  assert.equal(runner.addedAt, "2026-04-19");
+  assert.deepEqual(runner.games[0], { game: "er", role: "champion", challenges: [] });
+  assert.equal(runner.games.length, 2);
+  const entry = runner.games[1];
+  assert.deepEqual(entry, { game: "ds3", role: "grandmaster", addedAt: "2026-10-26T11:04:43Z", challenges: [{
+    title: "SL1 NG+7 +0 Weapon No Rolling/Blocking/Parrying/Infusions/Auxiliary Effects/Buffs",
+    proof: "https://www.youtube.com/playlist?list=PLuIIS8WVq4OVsYhB2J3BOIjbYUmnO8iAK", completedAt: "2025-10-18" }] });
+  assert(current.cat.isOfficialChallengeTitle(entry, entry.challenges[0]));
+  const before = JSON.stringify(runner);
+  for (const mode of ["short", "full"]) {
+    const html = render(current, runner, entry, mode);
+    assert.equal(html.replace(/<span class="challenge-extras">.*?<\/span><\/span><\/span>/s, ""), render(original, runner, entry, mode));
+    assert(html.includes('role="listitem">No Sprint</span>'));
+    assert(html.includes("tier-grandmaster"));
+    assert(html.includes('<img src="https://example.com/assets/runners/papa-alivo.jpg"'));
+    assert(!/world.?s first/i.test(html));
+  }
+  assert.equal(current.cat.entries().filter(({ runner: r, entry: e }) => r.id === "papa-alivo" && e.game === "ds3").length, 1);
+  assert.equal(JSON.stringify(runner), before);
 });
 
 test("renamed runner keeps their data, old links resolve and imports reach the same record", () => {
@@ -681,7 +710,7 @@ test("jonglesnorp's confirmed Sekiro Master title renders on Home and profile wi
     assert(html.includes("tier-master"));
   }
   assert.equal(current.cat.entries().sort(current.cat.compareVerifiedEntry)[0].entry,
-    current.cat.runners.find(r => r.id === "adonutirl").games.find(e => e.game === "ds3" && e.role === "hitless-sage"));
+    current.cat.runners.find(r => r.id === "papa-alivo").games.find(e => e.game === "ds3" && e.role === "grandmaster"));
   assert.equal(current.cat.entryCompletedAt(entry), "2026-03-08");
   assert.equal(JSON.stringify(runner), before);
 });
