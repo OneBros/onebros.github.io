@@ -316,6 +316,35 @@
         "elitemaster": "Elite Master",
         "grandmaster": "Grand Master"
       }
+    },
+    {
+      "id": "sote",
+      "title": "Shadow of the Erdtree",
+      "subtitle": "Elden Ring: Shadow of the Erdtree",
+      "short": "SotE",
+      "year": 2024,
+      "page": true,
+      "cardBackground": {
+        "src": "assets/games/sote-background.jpg",
+        "position": "center",
+        "overlay": -0.05
+      },
+      "pageBackground": {
+        "src": "assets/games/sote-background.jpg",
+        "position": "center"
+      },
+      "logo": {
+        "src": "assets/games/sote-logo.png",
+        "width": 1280,
+        "height": 336,
+        "blend": "screen"
+      },
+      "roles": [
+        "champion",
+        "legend",
+        "master",
+        "elitemaster"
+      ]
     }
   ]
 }

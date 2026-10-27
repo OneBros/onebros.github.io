@@ -1,0 +1,132 @@
+{
+  "game": "sote",
+  "tiers": [
+    {
+      "role": "champion",
+      "content": [
+        "ER SOTE RL1 Champion runs require all 13 main DLC bosses on the list to be defeated with screenshots/videos showing **stats, inventory screen, and boss drops/empty arenas.**",
+        "If you used any boss remembrances for items, show them as well for proof. It is strongly recommended to not use boss remembrances just for runes, as you are effectively destroying your own proof.",
+        "This list aims to be as faithful to a regular Hitless All DLC Legends Route as possible.",
+        "Required Bosses:",
+        {
+          "list": [
+            "Divine Beast Dancing Lion",
+            "Rellana, Twin Moon Knight",
+            "Putrescent Knight",
+            "Scadutree Avatar",
+            "Commander Gaius",
+            "Messmer the Impaler",
+            "Romina, Saint of the Bud",
+            "Metyr, Mother of Fingers",
+            "Jori, Elder Inquisitor",
+            "Midra, Lord of Frenzied Flame",
+            "Ancient Dragon Man",
+            "Bayle the Dread",
+            "Promised Consort Radahn"
+          ]
+        },
+        {
+          "text": "RL1 Shardbearer of Elden Ring proof example by 1recyclebin1.",
+          "url": "https://imgur.com/a/WboFWow"
+        }
+      ],
+      "challengesTitle": "",
+      "challenges": []
+    },
+    {
+      "role": "legend",
+      "content": [
+        "ER SOTE RL1 Legend runs require adding **one** of the extra restrictions below onto the base RL1 Champion run.",
+        "For proof, submissions need video of all fights showing **stats and equipment** after killing the boss. It is recommended to also show runes obtained, especially for higher NG kills."
+      ],
+      "challengesTitle": "Challenges",
+      "challenges": [
+        {
+          "title": "RL1 +0 Weapons No Auxiliary Effects",
+          "items": [
+            "Auxiliary Effects refers to Poison/Rot/Bleed/Frost/Sleep/Madness/Blight/Black Flame/Destined Death"
+          ]
+        },
+        {
+          "title": "RL1 NG+7 No Auxiliary Effects",
+          "items": [
+            "Auxiliary Effects refers to Poison/Rot/Bleed/Frost/Sleep/Madness/Blight/Black Flame/Destined Death"
+          ]
+        },
+        {
+          "title": "RL1 NG+ Torch Weapons Only Fresh Start No Auxiliary Effects",
+          "items": [
+            "Auxiliary Effects refers to Poison/Rot/Bleed/Frost/Sleep/Madness/Blight/Black Flame/Destined Death",
+            "Torch Weapons Only: you can use any of the torches from the Torch class in the game (aside from those with Aux).",
+            "Starting Equipment: start the run with only gear from the base game but on the required NG+",
+            "If need be, simply discard all SOTE equipment upon entering the DLC on NG+ to start the run. (don't use equipment before you could obtain it, e.g. Bell Bearings)"
+          ]
+        }
+      ]
+    },
+    {
+      "role": "master",
+      "content": [
+        "ER RL1 SOTE Master runs are equivalent to adding **two** of the extra restrictions from the Legend list onto the base ER RL1 Champion run.",
+        "For proof, submissions need video of all fights showing **stats and equipment** after killing the boss. It is recommended to also show runes obtained, especially for higher NG kills."
+      ],
+      "challengesTitle": "Challenges",
+      "challenges": [
+        {
+          "title": "RL1 NG+7 +0 Weapons No Auxiliary Effects",
+          "items": [
+            "Auxiliary Effects refers to Poison/Rot/Bleed/Frost/Sleep/Madness/Blight/Black Flame/Destined Death",
+            "Blessings are allowed",
+            "All runs must be done with the extra DLC Scaling active, more info about PCR+ [here](https://discord.com/channels/1491094800701722754/1491119777735901286/1493482425853149264)"
+          ]
+        }
+      ]
+    },
+    {
+      "role": "elitemaster",
+      "content": [
+        "ER RL1 SOTE Elite Master runs is a step up in the challenge provided by Master, the required bosses remains the same.",
+        "For proof, submissions need video of all fights showing **stats and equipment** after killing the boss. It is recommended to also show runes obtained."
+      ],
+      "challengesTitle": "Challenges",
+      "challenges": [
+        {
+          "title": "RL1 NG+7 +0 No Talismans/Auxiliary Effects/Affinities/Buffs",
+          "items": [
+            "Stat boosting and equipment buffs are not allowed on this run",
+            "Auxiliary Effects refers to Poison/Rot/Bleed/Frost/Sleep/Madness/Blight/Black Flame/Destined Death",
+            "Blessings are allowed",
+            "All runs must be done with the extra DLC Scaling active, more info about PCR+ [here](https://discord.com/channels/1491094800701722754/1491119777735901286/1493482425853149264)"
+          ]
+        }
+      ]
+    }
+  ],
+  "restrictions": {
+    "title": "Legend And Above Banned Equipment and Strategies",
+    "groups": [
+      {
+        "type": "allowed",
+        "title": "Allowed",
+        "items": [
+          "**Buffs: Flask of Wondrous Physick, Greases, and Great Runes** are allowed.",
+          "**Talismans and Player Equipment** (Armour like Rakshasa’s Set or having Twinbird Kite Shield on your back) **are always allowed.**",
+          "**Healing vs Mohg’s Bloodboon Ritual (Nihil)** is allowed.",
+          "Using Tape or Tools (Epic Pen, Tarnished Tool Hp Viewer) for Romina p2 transition is **allowed**",
+          "Leda & Her Allies is **not a boss** and can be defeated/cheesed in any way you see fit."
+        ]
+      },
+      {
+        "type": "banned",
+        "title": "Banned",
+        "items": [
+          "**Ashes of War:** [DSD Elden Ring Skills List](https://docs.google.com/spreadsheets/d/1Xo845Uo8famvEGyDRLoN_RvOr8abLtewlG8bhu_jFzM/edit?gid=0#gid=0) refer to this list to see what’s allowed.",
+          "**Stonebarb Cracked Tear is banned.** It makes poise breaking most bosses incredibly easy and trivializes fights as a result.",
+          "**Timed Buffs** such as: Body (e.g. Flame, Grant me Strength), Aura (e.g. Golden Vow), Stamina Regen (e.g. Pickled Turtle Neck), Unique (e.g. Oath of Vengeance), Shield (e.g. Barricade Shield), Health Regen (e.g. Bestial Vitality) **are banned**. The only exception being Endure to deal with Roar attacks such as Maliketh or Hoarah Loux.",
+          "**All ranged offensive Spells** are banned. They are too strong and promote passive play.",
+          "**Rot/Sleep** are banned. They trivialize certain fights and promote passive play."
+        ]
+      }
+    ]
+  }
+}

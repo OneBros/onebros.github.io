@@ -47,9 +47,20 @@
 
   /* ---------- Rule text rendering ---------- */
 
-  // Rule text: escaped, with **double asterisks** rendered as bold (the only markup supported).
+  // Rule text: escaped, with **double asterisks** rendered as bold and [text](url) as an external
+  // link (opens in a new tab); a link with an unsafe URL stays plain text.
   function inlineHtml(text) {
-    return escapeHtml(text).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    const bold = (s) => escapeHtml(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    return String(text ?? "")
+      .split(/(\[[^\]]+\]\([^)\s]+\))/)
+      .map((part) => {
+        const m = part.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
+        const url = m && safeUrl(m[2]);
+        return url
+          ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${bold(m[1])} ↗</a>`
+          : bold(part);
+      })
+      .join("");
   }
 
   // Rule text with the ** markers removed (for places that are already emphasised, e.g. headings).
