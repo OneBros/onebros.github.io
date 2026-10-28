@@ -1209,6 +1209,18 @@
               "completedAt": "2026-09-27"
             }
           ]
+        },
+        {
+          "game": "sekiro",
+          "role": "elitemaster",
+          "addedAt": "2026-10-28T18:57:04Z",
+          "challenges": [
+            {
+              "title": "NG+7 Attack Power 1 Sword Only No Skills",
+              "proof": "https://www.youtube.com/playlist?list=PLbz5tSDrgKEs",
+              "completedAt": "2026-10-25"
+            }
+          ]
         }
       ]
     },

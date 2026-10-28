@@ -191,7 +191,7 @@ test("all four run surfaces use approved titles and preserve pending entries", a
     }
   }
   assert.equal(JSON.stringify(cat.runners), before);
-  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 60, changed: 42, hitless: 25, pending: 0 });
+  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 61, changed: 42, hitless: 25, pending: 0 });
 });
 
 async function sekiroRenderingFixture(sourceOverride) {
@@ -710,7 +710,7 @@ test("jonglesnorp's confirmed Sekiro Master title renders on Home and profile wi
     assert(html.includes("tier-master"));
   }
   assert.equal(current.cat.entries().sort(current.cat.compareVerifiedEntry)[0].entry,
-    current.cat.runners.find(r => r.id === "papa-alivo").games.find(e => e.game === "ds3" && e.role === "grandmaster"));
+    current.cat.runners.find(r => r.id === "abyssalsnake").games.find(e => e.game === "sekiro" && e.role === "elitemaster"));
   assert.equal(current.cat.entryCompletedAt(entry), "2026-03-08");
   assert.equal(JSON.stringify(runner), before);
 });
