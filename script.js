@@ -177,10 +177,10 @@
 
   // A direct #anchor (e.g. #rules-no-hit) points into content rendered from JSON. Scroll to it
   // only once every section above it has rendered, so later content can't push it out of view.
-  function scrollToHash() {
+  function scrollToHash(behavior) {
     const hash = decodeURIComponent(window.location.hash.slice(1));
     const target = hash && document.getElementById(hash);
-    if (target) target.scrollIntoView();
+    if (target) target.scrollIntoView(behavior ? { behavior } : undefined);
   }
 
   async function init() {
@@ -207,7 +207,16 @@
     }
 
     await rulesReady;
-    scrollToHash();
+    if (window.restoreInitialSectionAnchor) {
+      // Font metrics must settle before positioning the final section. Do not animate
+      // the initial jump through intermediate parts of the page.
+      await document.fonts.ready;
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const restored = window.restoreInitialSectionAnchor();
+      if (restored) scrollToHash("instant");
+    } else {
+      scrollToHash();
+    }
   }
 
   document.addEventListener("DOMContentLoaded", init);

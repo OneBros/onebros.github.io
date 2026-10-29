@@ -3,6 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    // Defer initial section fragments before the browser can scroll to the loading layout.
+    // replaceState keeps the same history entry; subsequent navigation takes precedence.
+    (() => {
+      if (!/^#(?:rules|runners)$/.test(location.hash)) return;
+      const url = location.href;
+      let pending = true;
+      const cancel = () => { pending = false; };
+      const preserveEntry = () => {
+        if (pending && !location.hash) history.replaceState(history.state, "", url);
+        cancel();
+      };
+      const onClick = (event) => {
+        const link = event.target.closest("a[href]");
+        if (link && !event.defaultPrevented && event.button === 0 &&
+            !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey &&
+            !link.download && (!link.target || link.target === "_self")) preserveEntry();
+      };
+      addEventListener("hashchange", cancel);
+      addEventListener("popstate", cancel);
+      addEventListener("pagehide", preserveEntry);
+      document.addEventListener("click", onClick);
+      history.replaceState(history.state, "", location.pathname + location.search);
+      window.restoreInitialSectionAnchor = () => {
+        removeEventListener("hashchange", cancel);
+        removeEventListener("popstate", cancel);
+        removeEventListener("pagehide", preserveEntry);
+        document.removeEventListener("click", onClick);
+        delete window.restoreInitialSectionAnchor;
+        if (!pending || location.hash) return false;
+        history.replaceState(history.state, "", url);
+        return true;
+      };
+    })();
+  </script>
   <title>Onebros - Souls Challenge Run Community</title>
   <meta name="description" content="Onebros is a community for Souls challenge runs: rules, verified runners, completed challenges and proof of every run.">
   <meta name="theme-color" content="#0c0b0a">
