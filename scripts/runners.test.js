@@ -319,7 +319,19 @@ test("Runners enables profile ordering inside cards while preserving directory o
   vm.createContext(ctx);
   vm.runInContext(fs.readFileSync(require.resolve("../runners.js"), "utf8"), ctx);
   await init();
-  assert.deepEqual(calls.map(c => c.runner.id), Array.from([...cat.runners].sort(cat.compareRunnerCompleted), r => r.id));
+  const ordered = calls.map(c => c.runner);
+  assert.equal(ordered.length, cat.runners.length);
+  assert.equal(new Set(ordered.map(r => r.id)).size, cat.runners.length);
+  assert.equal(ordered[0].id, "keaton");
+  const date = r => cat.runnerCompletedAt(r) || r.addedAt || "";
+  for (let i = 1; i < ordered.length; i++) {
+    assert(date(ordered[i - 1]) >= date(ordered[i]));
+    if (date(ordered[i - 1]) === date(ordered[i])) {
+      assert(cat.runners.indexOf(ordered[i - 1]) > cat.runners.indexOf(ordered[i]));
+    }
+  }
+  assert.deepEqual(ordered.filter(r => cat.runnerCompletedAt(r)).map(r => r.id),
+    Array.from([...cat.runners].filter(r => cat.runnerCompletedAt(r)).sort(cat.compareRunnerCompleted), r => r.id));
   for (const { runner, entries, opts } of calls) {
     assert.equal(opts.background, true);
     assert.equal(opts.profileOrder, true);
@@ -709,8 +721,13 @@ test("jonglesnorp's confirmed Sekiro Master title renders on Home and profile wi
     assert(!html.includes("Pending"));
     assert(html.includes("tier-master"));
   }
-  assert.equal(current.cat.entries().sort(current.cat.compareVerifiedEntry)[0].entry,
-    current.cat.runners.find(r => r.id === "abyssalsnake").games.find(e => e.game === "sekiro" && e.role === "elitemaster"));
+  const recentEntries = current.cat.entries().sort(current.cat.compareVerifiedEntry);
+  for (let i = 1; i < recentEntries.length; i++) {
+    const previous = recentEntries[i - 1], next = recentEntries[i];
+    const previousAddedAt = previous.entry.addedAt || previous.runner.addedAt || "";
+    const nextAddedAt = next.entry.addedAt || next.runner.addedAt || "";
+    assert(previousAddedAt >= nextAddedAt, "Homepage entries must be ordered by addedAt, newest first");
+  }
   assert.equal(current.cat.entryCompletedAt(entry), "2026-03-08");
   assert.equal(JSON.stringify(runner), before);
 });

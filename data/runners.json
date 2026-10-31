@@ -1621,6 +1621,20 @@
           ]
         }
       ]
+    },
+    {
+      "id": "keaton",
+      "name": "keaton",
+      "avatar": "assets/runners/keaton.png",
+      "profile": null,
+      "addedAt": "2026-10-31",
+      "games": [
+        {
+          "game": "er",
+          "role": "champion",
+          "challenges": []
+        }
+      ]
     }
   ]
 }
