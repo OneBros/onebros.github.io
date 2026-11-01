@@ -881,9 +881,9 @@
     },
     {
       "id": "voidwalker-011",
-      "name": "voidwalker_011",
+      "name": "Ashenone",
       "avatar": "assets/runners/voidwalker-011.jpg",
-      "profile": "https://www.youtube.com/@LostfromASH",
+      "profile": "https://www.youtube.com/@Ashensoul-as",
       "addedAt": "2026-07-22",
       "games": [
         {
@@ -895,6 +895,19 @@
               "restrictions": "SL1 No Roll/Block/Parry",
               "proof": "https://youtube.com/playlist?list=PLMREUsX2tiro&si=frlT1oZQBP9bWlcL",
               "completedAt": "2026-07-22"
+            }
+          ]
+        },
+        {
+          "game": "ds1",
+          "role": "master",
+          "addedAt": "2026-11-01",
+          "challenges": [
+            {
+              "title": "SL1 NG+6 No Rolling/Blocking/Parrying",
+              "restrictions": "SL1 NG+6 No Rolling/Blocking/Parrying",
+              "proof": "https://www.youtube.com/playlist?list=PLD3Qe65CxdfQ",
+              "completedAt": "2026-10-31"
             }
           ]
         }
@@ -1633,6 +1646,54 @@
           "game": "er",
           "role": "champion",
           "challenges": []
+        }
+      ]
+    },
+    {
+      "id": "arden",
+      "name": "arden",
+      "avatar": "assets/runners/arden.png",
+      "profile": null,
+      "addedAt": "2026-11-01",
+      "games": [
+        {
+          "game": "sekiro",
+          "role": "champion",
+          "challenges": []
+        }
+      ]
+    },
+    {
+      "id": "yashaou",
+      "name": "Yashaou",
+      "avatar": "assets/runners/yashaou.png",
+      "profile": "https://www.teamhitless.com/project/yashaou/",
+      "addedAt": "2026-11-01",
+      "games": [
+        {
+          "game": "sekiro",
+          "role": "elitemaster",
+          "addedAt": "2026-11-01",
+          "challenges": [
+            {
+              "title": "NG+7 Attack Power 1 Sword Only No Skills",
+              "proof": "https://youtube.com/playlist?list=PLQyDGRROkhMo",
+              "completedAt": "2026-10-30"
+            }
+          ]
+        },
+        {
+          "game": "sekiro",
+          "role": "hitless-sage",
+          "addedAt": "2026-11-01",
+          "challenges": [
+            {
+              "title": "All Beads & Memories",
+              "restrictions": "Attack Power 1, No Kuro's Charm, Demon Bell, Sword Only, No Skills",
+              "proof": "https://youtu.be/oMJPGyjFJvA",
+              "completedAt": "2026-05-09"
+            }
+          ]
         }
       ]
     }

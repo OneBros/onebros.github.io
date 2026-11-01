@@ -3,6 +3,13 @@ const test = require("node:test"), assert = require("node:assert/strict"), fs = 
 const { mergeRun, toIsoDate, proofUrlsEqual, rowsFromCsv } = require("./sync-runners");
 const { validateRunners } = require("./validate-runners");
 const now = "2026-10-12T12:34:56Z";
+function storedHitlessChallengeCount() {
+  const games = JSON.parse(fs.readFileSync(require.resolve("../data/games.json"), "utf8"));
+  const runners = JSON.parse(fs.readFileSync(require.resolve("../data/runners.json"), "utf8")).runners;
+  const roles = new Set(games.roles.filter(role => role.track === "nohit").map(role => role.id));
+  return runners.flatMap(runner => runner.games).filter(entry => roles.has(entry.role))
+    .reduce((count, entry) => count + entry.challenges.length, 0);
+}
 const row = (overrides = {}) => ({ runnerName: "New Runner", gameId: "ds1", roleId: "master", restrictions: "SL1 No Roll", proof: "https://youtu.be/AbC123", ...overrides });
 const merge = (rows, base = { runners: [] }) => mergeRun(base, rows, {}, now).runners;
 test("new completion, Hitless and fallback use separate site-added time", () => {
@@ -121,6 +128,13 @@ test("all four run surfaces use approved titles and preserve pending entries", a
     ["game.js", { challengeMode: "full", sortCompleted: true, showGame: false }],
   ];
   const excluded = new Set();
+  // Count stored Onebros challenges independently of the rendering loop.
+  const runnerData = JSON.parse(fs.readFileSync(require.resolve("../data/runners.json"), "utf8"));
+  const gameData = JSON.parse(fs.readFileSync(require.resolve("../data/games.json"), "utf8"));
+  const onebrosRoles = new Set(gameData.roles.filter(role => role.track === "onebros").map(role => role.id));
+  const expectedSafe = runnerData.runners.reduce((total, runner) => total + runner.games
+    .filter(entry => onebrosRoles.has(entry.role) && !excluded.has(`${runner.id}/${entry.game}/${entry.role}`))
+    .reduce((count, entry) => count + entry.challenges.length, 0), 0);
   const confirmed = new Map([
     ["jonglesnorp/sekiro/master", "Attack Power 1 + No Prosthetic Tools + No Items/Buffs"],
     ["unholypancake/des/elitemaster", "SL1 NG+5 PBWT No Sprinting/Rolling/Blocking/Parrying"],
@@ -191,7 +205,7 @@ test("all four run surfaces use approved titles and preserve pending entries", a
     }
   }
   assert.equal(JSON.stringify(cat.runners), before);
-  assert.deepEqual({ safe, changed, hitless, pending }, { safe: 61, changed: 42, hitless: 25, pending: 0 });
+  assert.deepEqual({ safe, changed, hitless, pending }, { safe: expectedSafe, changed: 42, hitless: storedHitlessChallengeCount(), pending: 0 });
 });
 
 async function sekiroRenderingFixture(sourceOverride) {
@@ -322,8 +336,20 @@ test("Runners enables profile ordering inside cards while preserving directory o
   const ordered = calls.map(c => c.runner);
   assert.equal(ordered.length, cat.runners.length);
   assert.equal(new Set(ordered.map(r => r.id)).size, cat.runners.length);
-  assert.equal(ordered[0].id, "keaton");
   const date = r => cat.runnerCompletedAt(r) || r.addedAt || "";
+  const expectedOrder = [...cat.runners].sort((a, b) => {
+    const da = date(a), db = date(b);
+    return da === db ? cat.runners.indexOf(b) - cat.runners.indexOf(a) : da < db ? 1 : -1;
+  });
+  assert.deepEqual(ordered.map(r => r.id), expectedOrder.map(r => r.id));
+  // Homepage recent runs use site-added time, independent of completion dates or runner identity.
+  const expectedRecent = Array.from(cat.runners).flatMap(runner => runner.games.map(entry => ({ runner, entry })))
+    .sort((a, b) => {
+      const da = a.entry.addedAt || a.runner.addedAt || "";
+      const db = b.entry.addedAt || b.runner.addedAt || "";
+      return da === db ? cat.runners.indexOf(b.runner) - cat.runners.indexOf(a.runner) : da < db ? 1 : -1;
+    });
+  assert.deepEqual(recent, expectedRecent.map(pair => pair.entry));
   for (let i = 1; i < ordered.length; i++) {
     assert(date(ordered[i - 1]) >= date(ordered[i]));
     if (date(ordered[i - 1]) === date(ordered[i])) {
@@ -493,7 +519,7 @@ test("Jonathan's confirmed Sword Only label changes only his matching Sekiro cha
   }
 });
 
-test("all 25 Hitless challenges use stored titles and extras", async () => {
+test("all Hitless challenges use stored titles and extras", async () => {
   const source = fs.readFileSync(require.resolve("../shared.js"), "utf8");
   const previousSource = source.replace('return hitlessDisplayTitles.get(hitlessChallengeKey(runner, entry, challenge)) || "";', 'return "";');
   assert.notEqual(previousSource, source);
@@ -524,7 +550,7 @@ test("all 25 Hitless challenges use stored titles and extras", async () => {
       } else assert.equal(html, render(previous, runner, entry, mode));
     }
   }
-  assert.deepEqual({ structured, pending }, { structured: 25, pending: 0 });
+  assert.deepEqual({ structured, pending }, { structured: storedHitlessChallengeCount(), pending: 0 });
   assert.equal(JSON.stringify(current.cat.runners), before);
 });
 
