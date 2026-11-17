@@ -1696,6 +1696,27 @@
           ]
         }
       ]
+    },
+    {
+      "id": "nidswethe",
+      "name": "nidswethe",
+      "avatar": "assets/runners/nidswethe.jpg",
+      "profile": "https://www.youtube.com/@nidswethe",
+      "addedAt": "2026-11-17",
+      "games": [
+        {
+          "game": "ds2",
+          "role": "legend",
+          "challenges": [
+            {
+              "title": "SL1 CoC No Rolling/Blocking/Parrying",
+              "proof": "https://youtube.com/playlist?list=PLSDgW9hayVJp_T429wGPmqrIHVG_GjuUt",
+              "completedAt": "2026-11-03",
+              "addedAt": "2026-11-17"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
