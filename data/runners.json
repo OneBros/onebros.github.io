@@ -1139,6 +1139,18 @@
               "completedAt": "2026-08-21"
             }
           ]
+        },
+        {
+          "game": "ds1",
+          "role": "master",
+          "addedAt": "2026-11-18",
+          "challenges": [
+            {
+              "title": "SL1 NG+6 No Rolling/Blocking/Parrying",
+              "proof": "https://www.youtube.com/playlist?list=PLZJzve-wT5jg",
+              "completedAt": "2026-11-17"
+            }
+          ]
         }
       ]
     },
