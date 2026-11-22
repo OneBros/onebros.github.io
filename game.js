@@ -214,16 +214,29 @@
     }
 
     /* Hall of Fame — OneBros roles first (highest first), then the No Hit roles, kept apart */
-    const groupsFor = (trackId) =>
-      [...catalog.rolesInTrack(trackId)]
+    const groupsFor = (trackId) => {
+      const roles = catalog.rolesInTrack(trackId);
+      const ranks = new Map(roles.map((role) => [role.id, role.rank]));
+      const highestRankByRunner = new Map();
+      for (const { runner, entry } of gameEntries) {
+        const rank = ranks.get(entry.role);
+        if (rank === undefined) continue;
+        const highestRank = highestRankByRunner.get(runner.id) ?? -Infinity;
+        highestRankByRunner.set(runner.id, Math.max(highestRank, rank));
+      }
+
+      return [...roles]
         .reverse()
         .map((role) => ({
           role,
           entries: gameEntries
-            .filter(({ entry }) => entry.role === role.id)
+            .filter(({ runner, entry }) =>
+              entry.role === role.id && role.rank === highestRankByRunner.get(runner.id)
+            )
             .sort(catalog.compareCompletedEntry),
         }))
         .filter((g) => g.entries.length);
+    };
     const mainGroups = groupsFor("onebros");
     const noHitGroups = groupsFor("nohit");
 
