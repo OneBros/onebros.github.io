@@ -149,7 +149,7 @@ test("all four run surfaces use approved titles and preserve pending entries", a
     ["geod22", "No Prosthetic Tools + No Items/Buffs"],
     ["reaper8475", "No Prosthetic Tools + No Items/Buffs"],
     ["fragileember", "No Skills/Combat Arts + No Items/Buffs"],
-    ["ca-waves", "No Prosthetic Tools + No Skills/Combat Arts + No Items/Buffs"],
+    ["waves", "No Prosthetic Tools + No Skills/Combat Arts + No Items/Buffs"],
     ["abyssalsnake", "Attack Power 1 + No Prosthetic Tools + No Skills/Combat Arts + No Items/Buffs"],
     ["saigosen", "Attack Power 1 + No Prosthetic Tools + No Items/Buffs"],
   ]);
@@ -218,7 +218,7 @@ async function sekiroRenderingFixture(sourceOverride) {
   }
   const current = await load(source);
   const original = await load(source.replace('const displayTitle = officialDisplayTitle(catalog, runner, entry, c);', 'const displayTitle = "";'));
-  const ids = new Set(["geori", "geod22", "reaper8475", "fragileember", "ca-waves", "abyssalsnake", "saigosen"]);
+  const ids = new Set(["geori", "geod22", "reaper8475", "fragileember", "waves", "abyssalsnake", "saigosen"]);
   const reviewed = current.cat.runners.flatMap(r => ids.has(r.id)
     ? r.games.filter(e => e.game === "sekiro" && ["legend", "master"].includes(e.role)).map(e => ({ runner: r, entry: e })) : []);
   assert.equal(reviewed.length, 7);

@@ -751,27 +751,6 @@
       ]
     },
     {
-      "id": "ca-waves",
-      "name": "ca_waves",
-      "avatar": "assets/runners/ca-waves.jpg",
-      "profile": "https://www.youtube.com/@CA_WAVE-hm9qy",
-      "addedAt": "2026-06-26",
-      "games": [
-        {
-          "game": "sekiro",
-          "role": "legend",
-          "challenges": [
-            {
-              "title": "No Skills/Combat Arts",
-              "restrictions": "Demon Bell/Charmless/No revive(base legend restrictions), No Prosthetic, No Buffs/Items, No Skills/Combat Arts",
-              "proof": "https://www.youtube.com/playlist?list=PLSxsn9go2mTc",
-              "completedAt": "2026-07-02"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "saigosen",
       "name": "saigosen.",
       "avatar": "assets/runners/saigosen.jpg",
@@ -1124,6 +1103,7 @@
     },
     {
       "id": "waves",
+      "formerIds": ["ca-waves"],
       "name": "Waves",
       "avatar": "assets/runners/waves.jpg",
       "profile": "https://www.youtube.com/@CA_WAVE-hm9qy",
@@ -1149,6 +1129,19 @@
               "title": "SL1 NG+6 No Rolling/Blocking/Parrying",
               "proof": "https://www.youtube.com/playlist?list=PLZJzve-wT5jg",
               "completedAt": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "game": "sekiro",
+          "role": "legend",
+          "addedAt": "2026-06-26",
+          "challenges": [
+            {
+              "title": "No Skills/Combat Arts",
+              "restrictions": "Demon Bell/Charmless/No revive(base legend restrictions), No Prosthetic, No Buffs/Items, No Skills/Combat Arts",
+              "proof": "https://www.youtube.com/playlist?list=PLSxsn9go2mTc",
+              "completedAt": "2026-07-02"
             }
           ]
         }
@@ -1663,6 +1656,13 @@
         {
           "game": "er",
           "role": "champion",
+          "challenges": []
+        },
+        {
+          "game": "sote",
+          "role": "champion",
+          "addedAt": "2026-11-25T09:32:43Z",
+          "proof": "https://www.youtube.com/watch?v=T_ThElg0ugM&list=PLV_ZJSSPtK1Y",
           "challenges": []
         }
       ]
