@@ -592,6 +592,7 @@ const expectedExtras = new Map([
   ["recycle/er/hitless-sage", { title: "RL1 All Great Runes +0", extras: ["No Talismans", "No Auxiliary Damage", "No Status Effects"] }],
   ["zeldasouls/ds1/grandmaster", { title: "SL1 NG+6 +0 Weapon No Rolling/Blocking/Parrying/Auxiliary Effects", extras: ["No Sprint"] }],
   ["papa-alivo/ds3/grandmaster", { title: "SL1 NG+7 +0 Weapon No Rolling/Blocking/Parrying/Infusions/Auxiliary Effects/Buffs", extras: ["No Sprint"] }],
+  ["face-man/des/grandmaster", { title: "SL1 NG+5 PBWT Human Form +0 No Rolling/Blocking/Parrying", extras: ["No Sprint"] }],
 ]);
 
 test("structured Hitless fields and approved runs show extra restrictions, on all four surfaces", async () => {

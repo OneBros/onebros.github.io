@@ -499,6 +499,8 @@
       "https://www.youtube.com/playlist?list=PLU311asF84ipK5pDe7-UN937oIc6nIevi", ["No Sprint"]],
     ["papa-alivo", "ds3", "grandmaster", "SL1 NG+7 +0 Weapon No Rolling/Blocking/Parrying/Infusions/Auxiliary Effects/Buffs", null,
       "https://www.youtube.com/playlist?list=PLuIIS8WVq4OVsYhB2J3BOIjbYUmnO8iAK", ["No Sprint"]],
+    ["face-man", "des", "grandmaster", "SL1 NG+5 PBWT Human Form +0 No Rolling/Blocking/Parrying", null,
+      "https://youtube.com/playlist?list=PLa9uHo5DRDkQ", ["No Sprint"]],
   ].map(([id, game, role, title, restrictions, proof, extras]) =>
     [hitlessChallengeKey({ id }, { game, role }, { title, restrictions, proof }), extras]
   ));

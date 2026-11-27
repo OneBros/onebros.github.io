@@ -1327,6 +1327,18 @@
               "completedAt": "2025-02-19"
             }
           ]
+        },
+        {
+          "game": "des",
+          "role": "grandmaster",
+          "addedAt": "2026-11-27T08:41:54Z",
+          "challenges": [
+            {
+              "title": "SL1 NG+5 PBWT Human Form +0 No Rolling/Blocking/Parrying",
+              "proof": "https://youtube.com/playlist?list=PLa9uHo5DRDkQ",
+              "completedAt": "2026-11-01"
+            }
+          ]
         }
       ]
     },
